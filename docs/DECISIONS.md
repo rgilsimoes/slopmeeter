@@ -13,3 +13,9 @@ Use the plan's default MIT license because no owner override was provided.
 
 `D5` divides empty Python functions plus TODO/lorem markers by the number of Python functions plus
 markers. This deliberately makes explicit markers visible even in repositories with little Python.
+
+## 2026-10-01: URL targets and offline mode
+
+The plan says both that URL targets are cloned and that network access only occurs with `--online`.
+The safety principle wins: URL targets require `--online`; local targets remain fully offline by
+default.

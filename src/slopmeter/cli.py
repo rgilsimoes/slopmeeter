@@ -1,22 +1,25 @@
 from __future__ import annotations
 
 import argparse
+import os
 import sys
 from datetime import UTC, datetime
-from pathlib import Path
 
 from slopmeter import __version__
 from slopmeter.analyzer import analyze
 from slopmeter.checks.base import CHECKS
+from slopmeter.checks.online import GitHubClient
 from slopmeter.config import load_config
 from slopmeter.repo import RepoContext, RepoError
 from slopmeter.report import render
+from slopmeter.target import materialize
 
 
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(prog="slopmeter", description="Score repository evidence, not vibes.")
     parser.add_argument("target", nargs="?", help="local repository path or GitHub URL")
     parser.add_argument("--online", action="store_true", help="enable explicit network checks")
+    parser.add_argument("--deep-stars", action="store_true", help="sample a bounded number of stargazer accounts (online only)")
     parser.add_argument("--token", help="GitHub token (default: GITHUB_TOKEN)")
     parser.add_argument("--format", choices=("text", "json", "markdown"), default="text")
     parser.add_argument("--fail-under", type=float, metavar="N")
@@ -52,15 +55,22 @@ def main(argv: list[str] | None = None) -> int:
     if args.max_commits < 1:
         print("--max-commits must be at least 1", file=sys.stderr)
         return 2
-    if "://" in args.target:
-        print("URL targets are not available until the secure clone layer is enabled", file=sys.stderr)
+    if args.deep_stars and not args.online:
+        print("--deep-stars requires --online", file=sys.stderr)
         return 2
     try:
         config = load_config(args.config)
-        target = Path(args.target).expanduser()
-        repo = RepoContext(target, config=config, max_commits=args.max_commits)
-        results, _, score = analyze(repo, datetime.now(UTC), online=args.online)
-        print(render(args.format, args.target, results, score, args.online), end="")
+        with materialize(args.target, args.online) as (target, slug):
+            repo = RepoContext(target, config=config, max_commits=args.max_commits)
+            github_client = GitHubClient(*slug, token=args.token or os.environ.get("GITHUB_TOKEN")) if args.online and slug else None
+            results, _, score = analyze(
+                repo,
+                datetime.now(UTC),
+                online=args.online,
+                github_client=github_client,
+                deep_stars=args.deep_stars,
+            )
+            print(render(args.format, args.target, results, score, args.online), end="")
     except (OSError, ValueError, RepoError) as exc:
         print(f"slopmeter: {exc}", file=sys.stderr)
         return 2
