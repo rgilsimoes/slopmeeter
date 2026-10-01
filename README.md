@@ -19,10 +19,23 @@ unhyphenated name was already occupied.
 pipx install slop-meeter
 ```
 
+Alternatively, install the command with [uv](https://docs.astral.sh/uv/):
+
+```sh
+uv tool install slop-meeter
+```
+
 For a source checkout:
 
 ```sh
 pipx install .
+slopmeter /path/to/another/repository
+```
+
+The equivalent source installation with uv is:
+
+```sh
+uv tool install .
 slopmeter /path/to/another/repository
 ```
 
@@ -130,6 +143,15 @@ python -m venv .venv
 .venv/bin/pip install -e '.[dev]'
 .venv/bin/ruff check .
 .venv/bin/pytest
+```
+
+Or let uv create and manage the development environment:
+
+```sh
+uv sync --extra dev
+uv run ruff check .
+uv run pytest
+uv run slopmeter .
 ```
 
 Calibration data is deliberately owner-curated. Copy `calibration/labels.example.csv`, add reviewed
