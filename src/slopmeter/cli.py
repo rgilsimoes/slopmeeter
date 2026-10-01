@@ -2,9 +2,15 @@ from __future__ import annotations
 
 import argparse
 import sys
+from datetime import UTC, datetime
+from pathlib import Path
 
 from slopmeter import __version__
+from slopmeter.analyzer import analyze
 from slopmeter.checks.base import CHECKS
+from slopmeter.config import load_config
+from slopmeter.repo import RepoContext, RepoError
+from slopmeter.report import render
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -40,10 +46,28 @@ def main(argv: list[str] | None = None) -> int:
         return 0
     if not args.target:
         build_parser().error("target is required unless --list-checks, --explain, or --version is used")
-    print("analysis engine is not yet wired", file=sys.stderr)
-    return 2
+    if args.fail_under is not None and not 0 <= args.fail_under <= 100:
+        print("--fail-under must be between 0 and 100", file=sys.stderr)
+        return 2
+    if args.max_commits < 1:
+        print("--max-commits must be at least 1", file=sys.stderr)
+        return 2
+    if "://" in args.target:
+        print("URL targets are not available until the secure clone layer is enabled", file=sys.stderr)
+        return 2
+    try:
+        config = load_config(args.config)
+        target = Path(args.target).expanduser()
+        repo = RepoContext(target, config=config, max_commits=args.max_commits)
+        results, _, score = analyze(repo, datetime.now(UTC), online=args.online)
+        print(render(args.format, args.target, results, score, args.online), end="")
+    except (OSError, ValueError, RepoError) as exc:
+        print(f"slopmeter: {exc}", file=sys.stderr)
+        return 2
+    if args.fail_under is not None and score.evidence_score < args.fail_under:
+        return 1
+    return 0
 
 
 if __name__ == "__main__":
     raise SystemExit(main())
-

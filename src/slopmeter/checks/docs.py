@@ -53,7 +53,12 @@ def check_d2(repo: RepoContext, config: Config) -> CheckResult:
 def check_d3(repo: RepoContext, config: Config) -> CheckResult:
     del config
     tags = repo.git("tag", "--list", check=False).splitlines() if repo.is_git_repo else []
-    changelogs = [file.relative for file in repo.files if file.relative.lower().rsplit("/", 1)[-1].startswith(("changelog", "changes", "history"))]
+    changelogs = []
+    for file in repo.files:
+        basename = file.relative.lower().rsplit("/", 1)[-1]
+        stem = basename.split(".", 1)[0]
+        if stem in {"changelog", "changes", "history"}:
+            changelogs.append(file.relative)
     if tags:
         return result("D3", "pass", f"{len(tags)} release tag{'s' if len(tags) != 1 else ''} found", tags[:10])
     if changelogs:
@@ -116,4 +121,3 @@ def check_d5(repo: RepoContext, config: Config) -> CheckResult:
 
 def run(repo: RepoContext, config: Config) -> list[CheckResult]:
     return [check_d1(repo, config), check_d2(repo, config), check_d3(repo, config), check_d4(repo, config), check_d5(repo, config)]
-

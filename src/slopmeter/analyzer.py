@@ -1,0 +1,33 @@
+from __future__ import annotations
+
+from dataclasses import replace
+from datetime import datetime
+
+from slopmeter.checks import claims, docs, history, info, tests
+from slopmeter.checks.base import CheckResult, result
+from slopmeter.gitlog import Commit, parse_history
+from slopmeter.repo import RepoContext
+from slopmeter.scoring import Score, aggregate
+
+
+def analyze(repo: RepoContext, now: datetime, online: bool = False) -> tuple[list[CheckResult], tuple[Commit, ...], Score]:
+    commits = parse_history(repo)
+    results = [
+        *history.run(commits, repo.config),
+        *tests.run(repo, repo.config),
+        *claims.run(repo, repo.config),
+        *docs.run(repo, repo.config),
+    ]
+    if not online:
+        results.extend(
+            [
+                result("S2", "na", "online check disabled", []),
+                result("M1", "na", "online check disabled", []),
+                result("M2", "na", "online check disabled", []),
+                result("M3", "na", "online check disabled", []),
+            ]
+        )
+    results.extend(info.run(repo))
+    results = [replace(item, weight=repo.config.weight(item.id, item.weight)) for item in results]
+    return results, commits, aggregate(results, commits, now)
+
