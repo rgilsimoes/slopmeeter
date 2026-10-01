@@ -27,7 +27,10 @@ def _documentation_files(repo: RepoContext) -> list[str]:
     return [
         file.relative
         for file in repo.files
-        if "/" not in file.relative and file.suffix in {".md", ".rst", ".txt"}
+        if "/" not in file.relative
+        and file.suffix in {".md", ".rst", ".txt"}
+        and "plan" not in file.relative.lower()
+        and not file.relative.lower().startswith(("changelog", "license"))
     ]
 
 
@@ -114,4 +117,3 @@ def check_c3(repo: RepoContext, config: Config) -> CheckResult:
 def run(repo: RepoContext, config: Config) -> list[CheckResult]:
     claims = extract_claims(repo)
     return [check_c1(repo, config, claims), check_c2(repo, config, claims), check_c3(repo, config)]
-

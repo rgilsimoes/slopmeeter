@@ -57,7 +57,7 @@ def check_d3(repo: RepoContext, config: Config) -> CheckResult:
     for file in repo.files:
         basename = file.relative.lower().rsplit("/", 1)[-1]
         stem = basename.split(".", 1)[0]
-        if stem in {"changelog", "changes", "history"}:
+        if stem in {"changelog", "changes", "history"} and (file.suffix in {"", ".md", ".rst", ".txt"}):
             changelogs.append(file.relative)
     if tags:
         return result("D3", "pass", f"{len(tags)} release tag{'s' if len(tags) != 1 else ''} found", tags[:10])
@@ -85,7 +85,21 @@ def _python_placeholders(text: str) -> tuple[int, int]:
         tree = ast.parse(text)
     except SyntaxError:
         return 0, 0
-    functions = [node for node in ast.walk(tree) if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef))]
+    parents = {child: parent for parent in ast.walk(tree) for child in ast.iter_child_nodes(parent)}
+    functions = []
+    for node in ast.walk(tree):
+        if not isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
+            continue
+        parent = parents.get(node)
+        protocol_method = isinstance(parent, ast.ClassDef) and any(
+            isinstance(base, ast.Name) and base.id == "Protocol" for base in parent.bases
+        )
+        abstract_method = any(
+            isinstance(decorator, ast.Name) and decorator.id == "abstractmethod"
+            for decorator in node.decorator_list
+        )
+        if not protocol_method and not abstract_method:
+            functions.append(node)
     placeholders = 0
     for function in functions:
         body = function.body

@@ -51,7 +51,7 @@ def test_install_risk_is_static(tmp_path):
 
 
 def test_secret_is_redacted(tmp_path):
-    secret = "AKIA1234567890ABCDEF"
+    secret = "AKIA" + "1234567890ABCDEF"
     repo = repo_with(tmp_path, {"config.txt": f"key={secret}\n"})
     checked = deps.check_s4(repo, Config())
     assert checked.status == "fail"
@@ -65,4 +65,3 @@ def test_offline_run_does_not_call_registry(tmp_path):
     results = {item.id: item for item in deps.run(repo, Config(), online=False, client=client)}
     assert results["S2"].status == "na"
     assert client.calls == []
-
