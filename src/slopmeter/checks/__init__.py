@@ -1,0 +1,2 @@
+"""Static, explainable repository checks."""
+
