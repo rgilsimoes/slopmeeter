@@ -1,27 +1,27 @@
 # Slop Meeter report
 
 **Target:** `.`  
-**Evidence score:** 79/100 · **Slop level:** 2/10 · **Confidence:** 77% (offline)  
-**Verdict:** Mostly vibes. (Too early to tell: 7 commits, 0 days old)
+**Evidence score:** 88/100 · **Slop level:** 1/10 · **Confidence:** 77% (offline)  
+**Verdict:** Solid. Receipts included. (Too early to tell: 10 commits, 0 days old)
 
 | Category | Score | Check | Status | Evidence |
 |---|---:|---|---|---|
-| History & substance | 45 | H1 Commit depth | fail | 7 commits inspected |
-|  | 45 | H2 Largest-commit share | pass | largest commit holds 21% of added lines |
-|  | 45 | H3 Time spread | fail | 1 active days across a 1-day span |
-|  | 45 | H4 Commit messages | pass | 0 of 7 messages are generic |
-|  | 45 | H5 Contributors | warn | 1 non-bot contributor identity |
-| Tests & CI | 100 | T1 Tests present | pass | 348 test LOC / 1423 source LOC (24%) |
-|  | 100 | T2 Tests assert | pass | 30 of 30 test functions contain meaningful assertions |
+| History & substance | 60 | H1 Commit depth | warn | 10 commits inspected |
+|  | 60 | H2 Largest-commit share | pass | largest commit holds 18% of added lines |
+|  | 60 | H3 Time spread | fail | 1 active day across a 1-day span |
+|  | 60 | H4 Commit messages | pass | 0 of 10 messages are generic |
+|  | 60 | H5 Contributors | warn | 1 non-bot contributor identity |
+| Tests & CI | 100 | T1 Tests present | pass | 428 test LOC / 1529 source LOC (28%) |
+|  | 100 | T2 Tests assert | pass | 36 of 36 test functions contain meaningful assertions |
 |  | 100 | T3 CI runs tests | pass | CI configuration runs tests |
 | Claims vs. receipts | 100 | C1 Claims have receipts | pass | no quantitative or superlative claims found |
 |  | 100 | C2 Eval harness present | na | no claims require an evaluation harness |
-|  | 100 | C3 Hype density | pass | 0 buzzwords in 36 README words (0.0 per 1,000) |
-| Docs, release & composition | 62 | D1 README essentials | fail | README contains 1 of 3 essentials |
-|  | 62 | D2 License | pass | recognized mit license |
-|  | 62 | D3 Release hygiene | fail | no release tags or changelog found |
-|  | 62 | D4 Substance vs. fluff | pass | code is 74% of 115950 tracked bytes |
-|  | 62 | D5 Placeholder density | pass | 0 empty functions and 5 placeholder markers |
+|  | 100 | C3 Hype density | pass | 2 buzzwords in 715 README words (2.8 per 1,000) |
+| Docs, release & composition | 94 | D1 README essentials | pass | README contains 3 of 3 essentials |
+|  | 94 | D2 License | pass | recognized mit license |
+|  | 94 | D3 Release hygiene | warn | changelog found without a release tag |
+|  | 94 | D4 Substance vs. fluff | pass | code is 68% of 137731 tracked bytes |
+|  | 94 | D5 Placeholder density | pass | 0 empty functions and 6 placeholder markers |
 | Dependencies & security | 100 | S1 Lockfile / pinning | pass | no third-party runtime dependencies declared |
 |  | 100 | S2 Dependencies exist | na | online check disabled |
 |  | 100 | S3 Install-time risk | pass | no install-time execution patterns found |

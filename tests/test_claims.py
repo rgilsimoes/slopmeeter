@@ -22,7 +22,8 @@ def test_claims_with_and_without_receipts_have_evidence(tmp_path):
                 "The engine is 37% faster in our benchmark.\n"
                 "See [the harness](bench/run.py).\n\n"
                 "## More\n\n"
-                "It also outperforms every alternative.\n"
+                + "Context line.\n" * 11
+                + "It also outperforms every alternative.\n"
             ),
             "bench/run.py": "print('static fixture; never executed')\n",
         },
@@ -31,7 +32,7 @@ def test_claims_with_and_without_receipts_have_evidence(tmp_path):
     assert results["C1"].status == "warn"
     assert results["C1"].evidence == [
         "README.md:3 receipt — The engine is 37% faster in our benchmark.",
-        "README.md:8 no receipt — It also outperforms every alternative.",
+        "README.md:19 no receipt — It also outperforms every alternative.",
     ]
     assert results["C2"].status == "pass"
 
@@ -50,3 +51,9 @@ def test_no_claims_pass_and_harness_is_na(tmp_path):
     assert results["C1"].status == "pass"
     assert results["C2"].status == "na"
 
+
+def test_claims_inside_code_fences_are_ignored(tmp_path):
+    repo = make_repo(tmp_path, {"README.md": "# Output\n\n```text\n37% faster\n```\n"})
+    results = {item.id: item for item in run(repo, Config())}
+    assert results["C1"].status == "pass"
+    assert results["C1"].evidence == []

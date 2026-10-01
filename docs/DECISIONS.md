@@ -19,3 +19,8 @@ markers. This deliberately makes explicit markers visible even in repositories w
 The plan says both that URL targets are cloned and that network access only occurs with `--online`.
 The safety principle wins: URL targets require `--online`; local targets remain fully offline by
 default.
+
+## 2026-10-01: Remaining owner decisions
+
+The GitHub owner/repository and real calibration labels remain unset because they require owner input.
+No AI-disclosure footer was added; the neutral I1 check reports only disclosures that actually exist.

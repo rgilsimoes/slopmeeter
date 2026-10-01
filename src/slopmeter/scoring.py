@@ -3,7 +3,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from datetime import datetime
 
-from slopmeter.checks.base import CATEGORIES, CHECKS, CheckResult
+from slopmeter.checks.base import CATEGORIES, CheckResult
 from slopmeter.gitlog import Commit
 
 STATUS_POINTS = {"pass": 1.0, "warn": 0.5, "fail": 0.0}
@@ -65,7 +65,7 @@ def aggregate(results: list[CheckResult], commits: tuple[Commit, ...], now: date
             applicable_category_weight += category_weight
         categories.append(CategoryScore(category_id, name, category_weight, score))
     evidence_score = weighted_categories / applicable_category_weight if applicable_category_weight else 0.0
-    possible = sum(check.weight for check in CHECKS if check.weight > 0)
+    possible = sum(item.weight for item in results if item.weight > 0)
     applicable_weight = sum(item.weight for item in results if item.status != "na" and item.weight > 0)
     confidence = applicable_weight / possible if possible else 0.0
     return Score(
@@ -76,4 +76,3 @@ def aggregate(results: list[CheckResult], commits: tuple[Commit, ...], now: date
         maturity_note=maturity_note(commits, now),
         categories=tuple(categories),
     )
-

@@ -8,7 +8,7 @@ from slopmeter.config import Config
 from slopmeter.repo import RepoContext
 
 CLAIM_PATTERN = re.compile(
-    r"(?:\b\d+(?:\.\d+)?\s?(?:%|x|×)\b|\b(?:faster|improves?|reduces?|state[- ]of[- ]the[- ]art|SOTA|production[- ]ready|outperforms?)\b)",
+    r"(?:\b\d+(?:\.\d+)?\s?(?:%|x|×)(?!\w)|\b(?:faster|improves?|reduces?|state[- ]of[- ]the[- ]art|SOTA|production[- ]ready|outperforms?)\b)",
     re.I,
 )
 LINK_PATTERN = re.compile(r"\[[^\]]+\]\(([^)]+)\)|https?://[^\s)>]+", re.I)
@@ -52,14 +52,22 @@ def extract_claims(repo: RepoContext) -> list[Claim]:
     for path in _documentation_files(repo):
         lines = repo.read_text(path).splitlines()
         headings = [index for index, line in enumerate(lines) if re.match(r"^#{1,6}\s", line)]
+        fenced = False
         for index, line in enumerate(lines):
+            if line.lstrip().startswith("```"):
+                fenced = not fenced
+                continue
+            if fenced:
+                continue
             if not CLAIM_PATTERN.search(line):
                 continue
             section_start = max((heading for heading in headings if heading <= index), default=0)
             section_end = min((heading for heading in headings if heading > index), default=len(lines))
-            nearby_start = max(section_start, index - 10)
-            nearby_end = min(section_end, index + 11)
-            receipt = _link_has_receipt(repo, "\n".join(lines[nearby_start:nearby_end]))
+            nearby_start = max(0, index - 10)
+            nearby_end = min(len(lines), index + 11)
+            receipt = _link_has_receipt(repo, "\n".join(lines[nearby_start:nearby_end])) or _link_has_receipt(
+                repo, "\n".join(lines[section_start:section_end])
+            )
             excerpt = " ".join(line.strip().split())[:140]
             claims.append(Claim(path, index + 1, excerpt, receipt))
     return claims

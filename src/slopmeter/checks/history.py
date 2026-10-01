@@ -52,7 +52,8 @@ def check_h3(commits: tuple[Commit, ...], config: Config) -> CheckResult:
         status = "warn"
     else:
         status = "fail"
-    return result("H3", status, f"{len(days)} active days across a {span}-day span", [f"first: {min(days)}", f"last: {max(days)}"])
+    day_word = "day" if len(days) == 1 else "days"
+    return result("H3", status, f"{len(days)} active {day_word} across a {span}-day span", [f"first: {min(days)}", f"last: {max(days)}"])
 
 
 def check_h4(commits: tuple[Commit, ...], config: Config) -> CheckResult:
@@ -80,4 +81,3 @@ def check_h5(commits: tuple[Commit, ...], config: Config) -> CheckResult:
 
 def run(commits: tuple[Commit, ...], config: Config) -> list[CheckResult]:
     return [check_h1(commits, config), check_h2(commits, config), check_h3(commits, config), check_h4(commits, config), check_h5(commits, config)]
-
