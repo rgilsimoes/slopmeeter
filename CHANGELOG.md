@@ -2,6 +2,16 @@
 
 All notable changes to Slop Meeter are documented here.
 
+## Unreleased
+
+- Added an interactive progress spinner with rotating Slop Meeter status messages; it stays quiet for
+  pipes and redirected output.
+- Added accessible ANSI-coloured text reports with automatic TTY, `NO_COLOR`, and `TERM=dumb`
+  handling plus explicit `--color` control.
+- Added deterministic, responsive, printable, and self-contained HTML reports with escaped repository
+  content and prioritized inspection guidance.
+- Added atomic `-o/--output` file writing for every report format.
+
 ## 0.1.0 — 2026-10-01
 
 - Added 24 explainable repository checks across history, tests, claims, documentation, dependencies,

@@ -1,11 +1,79 @@
 from __future__ import annotations
 
-import json
-from dataclasses import asdict
+from dataclasses import asdict, dataclass
 
 from slopmeter import __version__
-from slopmeter.checks.base import CATEGORIES, CheckResult
-from slopmeter.scoring import Score
+from slopmeter.checks.base import CHECK_BY_ID, CHECKS, CheckResult
+from slopmeter.scoring import CategoryScore, Score
+
+
+@dataclass(frozen=True)
+class InspectionItem:
+    check_id: str
+    title: str
+    status: str
+    finding: str
+    rationale: str
+
+
+@dataclass(frozen=True)
+class ReportView:
+    version: str
+    target: str
+    mode: str
+    evidence_score: float
+    slop_level: int
+    confidence: float
+    verdict: str
+    maturity_note: str | None
+    categories: tuple[CategoryScore, ...]
+    checks: tuple[CheckResult, ...]
+    status_counts: tuple[tuple[str, int], ...]
+    inspections: tuple[InspectionItem, ...]
+
+
+def _inspection_items(results: list[CheckResult]) -> tuple[InspectionItem, ...]:
+    check_order = {check.id: index for index, check in enumerate(CHECKS)}
+    candidates = [
+        check for check in results if check.category != "info" and check.status in {"fail", "warn"}
+    ]
+    candidates.sort(
+        key=lambda check: (
+            0 if check.status == "fail" else 1,
+            -check.weight,
+            check_order[check.id],
+        )
+    )
+    return tuple(
+        InspectionItem(
+            check_id=check.id,
+            title=check.name,
+            status=check.status,
+            finding=check.message,
+            rationale=CHECK_BY_ID[check.id].rationale,
+        )
+        for check in candidates[:3]
+    )
+
+
+def _report_view(target: str, results: list[CheckResult], score: Score, online: bool) -> ReportView:
+    return ReportView(
+        version=__version__,
+        target=target,
+        mode="online" if online else "offline",
+        evidence_score=score.evidence_score,
+        slop_level=score.slop_level,
+        confidence=score.confidence,
+        verdict=score.verdict,
+        maturity_note=score.maturity_note,
+        categories=score.categories,
+        checks=tuple(results),
+        status_counts=tuple(
+            (status, sum(check.category != "info" and check.status == status for check in results))
+            for status in ("pass", "warn", "fail", "na")
+        ),
+        inspections=_inspection_items(results),
+    )
 
 
 def _number(value: float) -> int | float:
@@ -13,7 +81,9 @@ def _number(value: float) -> int | float:
     return int(rounded) if rounded.is_integer() else rounded
 
 
-def report_data(target: str, results: list[CheckResult], score: Score, online: bool) -> dict[str, object]:
+def report_data(
+    target: str, results: list[CheckResult], score: Score, online: bool
+) -> dict[str, object]:
     return {
         "schema_version": 1,
         "tool": {"name": "slopmeter", "version": __version__},
@@ -25,7 +95,10 @@ def report_data(target: str, results: list[CheckResult], score: Score, online: b
         "verdict": score.verdict,
         "maturity_note": score.maturity_note,
         "categories": [
-            {**asdict(category), "score": None if category.score is None else _number(category.score)}
+            {
+                **asdict(category),
+                "score": None if category.score is None else _number(category.score),
+            }
             for category in score.categories
         ],
         "checks": [item.as_dict() for item in results],
@@ -33,56 +106,49 @@ def report_data(target: str, results: list[CheckResult], score: Score, online: b
 
 
 def render_json(target: str, results: list[CheckResult], score: Score, online: bool) -> str:
-    return json.dumps(report_data(target, results, score, online), indent=2, sort_keys=True, ensure_ascii=False) + "\n"
+    from slopmeter.renderers.json import render_json_report
+
+    return render_json_report(report_data(target, results, score, online))
 
 
-def render_text(target: str, results: list[CheckResult], score: Score, online: bool) -> str:
-    lines = [
-        f"Slop Meeter v{__version__} · target: {target}",
-        f"Evidence score: {score.evidence_score:.0f}/100 · Slop level: {score.slop_level}/10 · Confidence: {score.confidence:.0%} ({'online' if online else 'offline'})",
-        f"Verdict: {score.verdict}" + (f" ({score.maturity_note})" if score.maturity_note else ""),
-        "",
-    ]
-    for category in score.categories:
-        if category.score is None:
-            continue
-        lines.append(f"{category.name:<30} {category.score:>3.0f}")
-        for check in (item for item in results if item.category == category.id):
-            lines.append(f"  {check.id:<3} {check.status:<4} {check.message}")
-            lines.extend(f"      {evidence}" for evidence in check.evidence)
-    information = [item for item in results if item.category == "info"]
-    if information:
-        lines.append("")
-        lines.extend(f"Info: {item.name}: {item.message} (not scored)" for item in information)
-    return "\n".join(lines) + "\n"
+def render_text(
+    target: str,
+    results: list[CheckResult],
+    score: Score,
+    online: bool,
+    *,
+    color: bool = False,
+) -> str:
+    from slopmeter.renderers.text import render_text_report
+
+    return render_text_report(_report_view(target, results, score, online), color=color)
 
 
 def render_markdown(target: str, results: list[CheckResult], score: Score, online: bool) -> str:
-    lines = [
-        "# Slop Meeter report",
-        "",
-        f"**Target:** `{target}`  ",
-        f"**Evidence score:** {score.evidence_score:.0f}/100 · **Slop level:** {score.slop_level}/10 · **Confidence:** {score.confidence:.0%} ({'online' if online else 'offline'})  ",
-        f"**Verdict:** {score.verdict}" + (f" ({score.maturity_note})" if score.maturity_note else ""),
-        "",
-        "| Category | Score | Check | Status | Evidence |",
-        "|---|---:|---|---|---|",
-    ]
-    for category in score.categories:
-        if category.score is None:
-            continue
-        category_name = CATEGORIES[category.id][0]
-        category_results = [item for item in results if item.category == category.id]
-        for index, check in enumerate(category_results):
-            evidence = check.message.replace("|", "\\|")
-            lines.append(f"| {category_name if index == 0 else ''} | {category.score:.0f} | {check.id} {check.name} | {check.status} | {evidence} |")
-    return "\n".join(lines) + "\n"
+    from slopmeter.renderers.markdown import render_markdown_report
+
+    return render_markdown_report(_report_view(target, results, score, online))
 
 
-def render(format_name: str, target: str, results: list[CheckResult], score: Score, online: bool) -> str:
+def render_html(target: str, results: list[CheckResult], score: Score, online: bool) -> str:
+    from slopmeter.renderers.html import render_html_report
+
+    return render_html_report(_report_view(target, results, score, online))
+
+
+def render(
+    format_name: str,
+    target: str,
+    results: list[CheckResult],
+    score: Score,
+    online: bool,
+    *,
+    color: bool = False,
+) -> str:
     if format_name == "json":
         return render_json(target, results, score, online)
     if format_name == "markdown":
         return render_markdown(target, results, score, online)
-    return render_text(target, results, score, online)
-
+    if format_name == "html":
+        return render_html(target, results, score, online)
+    return render_text(target, results, score, online, color=color)

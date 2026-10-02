@@ -1,11 +1,15 @@
 import json
+import re
+from dataclasses import replace
 from datetime import UTC, datetime
+from pathlib import Path
 
 from slopmeter.checks.base import result
-from slopmeter.report import render_json
+from slopmeter.report import render, render_json
 from slopmeter.scoring import aggregate, label
 
 NOW = datetime(2026, 1, 1, tzinfo=UTC)
+GOLDEN = Path(__file__).with_name("golden")
 
 
 def test_verdict_boundaries():
@@ -39,3 +43,95 @@ def test_json_is_byte_identical_and_has_schema_fields():
     assert data["target"] == "."
     assert isinstance(data["checks"], list)
 
+
+def test_json_and_markdown_match_compatibility_goldens():
+    results = [
+        result("H1", "fail", "0 commits", ["no git history"]),
+        result("H2", "warn", "one large commit"),
+        result("H4", "pass", "specific messages"),
+        result("S2", "na", "offline"),
+    ]
+    score = aggregate(results, (), NOW)
+
+    assert render("json", ".", results, score, False) == (GOLDEN / "report.json").read_text()
+    assert render("markdown", ".", results, score, False) == (GOLDEN / "report.md").read_text()
+
+
+def test_coloured_text_is_plain_text_with_semantic_ansi_styles():
+    results = [
+        result("H1", "fail", "too few commits"),
+        result("H2", "warn", "one large commit"),
+        result("H4", "pass", "specific messages"),
+        result("S2", "na", "offline"),
+    ]
+    score = aggregate(results, (), NOW)
+
+    plain = render("text", ".", results, score, False, color=False)
+    coloured = render("text", ".", results, score, False, color=True)
+
+    assert "\x1b[" not in plain
+    assert "\x1b[" in coloured
+    assert re.sub(r"\x1b\[[0-9;]*m", "", coloured) == plain
+    assert "! WARN" in plain
+    assert "× FAIL" in plain
+    assert "✓ PASS" in plain
+    assert "– N/A" in plain
+    assert "CATEGORY SCORES" in plain
+
+
+def test_html_report_is_self_contained_safe_and_prioritises_inspection():
+    results = [
+        result("H1", "warn", "short history", ["<img src=x onerror=alert(1)>"]),
+        result("T1", "fail", "tests are missing"),
+        result("C1", "fail", "claims lack receipts"),
+        result("S2", "na", "offline"),
+        result("I1", "pass", "AGENTS.md found"),
+    ]
+    score = aggregate(results, (), NOW)
+
+    document = render("html", '<repo data-x="unsafe">', results, score, False)
+
+    assert document.startswith("<!doctype html>\n")
+    assert document.endswith("\n")
+    assert '<repo data-x="unsafe">' not in document
+    assert "&lt;repo data-x=&quot;unsafe&quot;&gt;" in document
+    assert "<img src=x onerror=alert(1)>" not in document
+    assert "&lt;img src=x onerror=alert(1)&gt;" in document
+    assert "Content-Security-Policy" in document
+    assert "<script" not in document.lower()
+    assert "https://" not in document
+    assert "A score is a prompt for scrutiny, not a verdict on the authors." in document
+    assert "Information · not scored" in document
+
+    priorities = document.split("What to inspect next", 1)[1].split("Evidence checks", 1)[0]
+    assert priorities.index("Claims have receipts") < priorities.index("Tests present")
+    assert priorities.index("Tests present") < priorities.index("Commit depth")
+
+
+def test_html_report_has_an_accessible_all_pass_state_without_a_maturity_note():
+    results = [result("H1", "pass", "healthy history")]
+    score = replace(aggregate(results, (), NOW), maturity_note=None)
+
+    first = render("html", ".", results, score, False)
+    second = render("html", ".", results, score, False)
+
+    assert first == second
+    assert 'role="img" aria-label="Evidence score' in first
+    assert "<table>" in first
+    assert 'scope="col"' in first
+    assert 'aria-label="Check status counts"' in first
+    assert "No failed or warning checks need immediate review." in first
+    assert "A short history limits long-term signals." not in first
+    assert "@media print" in first
+
+
+def test_rendering_does_not_mutate_analysis_results():
+    results = [result("H1", "warn", "short history", ["3 commits"])]
+    original_results = list(results)
+    score = aggregate(results, (), NOW)
+
+    for format_name in ("text", "json", "markdown", "html"):
+        render(format_name, ".", results, score, False, color=True)
+
+    assert results == original_results
+    assert results[0].evidence == ["3 commits"]

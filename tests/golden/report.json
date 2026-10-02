@@ -1,0 +1,96 @@
+{
+  "categories": [
+    {
+      "id": "history",
+      "name": "History & substance",
+      "score": 35.71,
+      "weight": 25
+    },
+    {
+      "id": "tests",
+      "name": "Tests & CI",
+      "score": null,
+      "weight": 20
+    },
+    {
+      "id": "claims",
+      "name": "Claims vs. receipts",
+      "score": null,
+      "weight": 20
+    },
+    {
+      "id": "docs",
+      "name": "Docs, release & composition",
+      "score": null,
+      "weight": 10
+    },
+    {
+      "id": "security",
+      "name": "Dependencies & security",
+      "score": null,
+      "weight": 10
+    },
+    {
+      "id": "maintenance",
+      "name": "Maintenance & attention",
+      "score": null,
+      "weight": 15
+    }
+  ],
+  "checks": [
+    {
+      "category": "history",
+      "evidence": [
+        "no git history"
+      ],
+      "id": "H1",
+      "message": "0 commits",
+      "name": "Commit depth",
+      "requires_online": false,
+      "status": "fail",
+      "weight": 3
+    },
+    {
+      "category": "history",
+      "evidence": [],
+      "id": "H2",
+      "message": "one large commit",
+      "name": "Largest-commit share",
+      "requires_online": false,
+      "status": "warn",
+      "weight": 3
+    },
+    {
+      "category": "history",
+      "evidence": [],
+      "id": "H4",
+      "message": "specific messages",
+      "name": "Commit messages",
+      "requires_online": false,
+      "status": "pass",
+      "weight": 1
+    },
+    {
+      "category": "security",
+      "evidence": [],
+      "id": "S2",
+      "message": "offline",
+      "name": "Dependencies exist",
+      "requires_online": true,
+      "status": "na",
+      "weight": 3
+    }
+  ],
+  "confidence": 70,
+  "evidence_score": 35.71,
+  "maturity_note": "Too early to tell: 0 commits, 0 days old",
+  "mode": "offline",
+  "schema_version": 1,
+  "slop_level": 6,
+  "target": ".",
+  "tool": {
+    "name": "slopmeter",
+    "version": "0.1.0"
+  },
+  "verdict": "Peak slop."
+}

@@ -49,7 +49,10 @@ slopmeter <path-or-url> [options]
   --online                    enable registry and GitHub API checks
   --token TOKEN               GitHub token; defaults to GITHUB_TOKEN
   --deep-stars                bounded stargazer-account sampling; requires --online
-  --format text|json|markdown output format (default: text)
+  --format text|json|markdown|html
+                              output format (default: text)
+  --color auto|always|never  colourise text output (default: auto)
+  -o, --output FILE          write the report to FILE
   --fail-under N              exit 1 when the evidence score is below N
   --max-commits N             history cap (default: 5000)
   --config FILE               TOML weight, threshold, ignore and buzzword overrides
@@ -65,29 +68,62 @@ directory and removed afterward; because cloning is network access, URL targets 
 slopmeter .
 slopmeter ../interesting-tool --format json --fail-under 60
 slopmeter https://github.com/owner/project --online --format markdown
+slopmeter . --format html --output slopmeter-report.html
 slopmeter --explain C1
 ```
 
 Exit status is `0` for a completed run, `1` when `--fail-under` is not met, and `2` for usage or runtime
 errors. Tokens and detected secret values are never printed.
 
-## Sample
+While an analysis is running in an interactive terminal, Slop Meeter shows a spinner with rotating
+status messages such as “Deslopifying” and “Unsloptastic”. The indicator is written to stderr and
+automatically disabled for pipes and redirected output, so reports remain machine-readable.
+
+## Reports
+
+Interactive text output uses colour when stdout is a compatible terminal. `--color always` forces
+ANSI colour, while `--color never` disables it. The default `auto` mode emits plain text when output is
+piped, redirected, written with `--output`, `NO_COLOR` is present, or `TERM=dumb`. JSON, Markdown, and
+HTML never receive ANSI sequences.
+
+![Coloured terminal report](docs/prototypes/coloured-cli-proposal.png)
+
+The HTML format is a single responsive and printable file with no JavaScript, remote assets, tracking,
+or network requests. Repository-provided text is escaped and evidence paths are displayed as text
+rather than converted into local links.
+
+![HTML evidence report](docs/prototypes/html-report-proposal.png)
+
+`--output` is available for every format and replaces its destination only after rendering and writing
+complete successfully. Without it, reports continue to be written to stdout.
+
+## Text sample
 
 ```text
-Slop Meeter v0.1.0 · target: ./some-tool
-Evidence score: 64/100 · Slop level: 4/10 · Confidence: 83% (offline)
-Verdict: Promising. Some receipts. (Too early to tell: 11 commits, 9 days old)
+SLOP MEETER v0.1.0
+score the evidence, not the vibes
+target  ./some-tool
+────────────────────────────────────────────────────────────────────────────────────────────────
+EVIDENCE SCORE  64 / 100            SLOP LEVEL  4 / 10        CONFIDENCE  83% · offline
+VERDICT         Promising. Some receipts.
+MATURITY        Too early to tell: 11 commits, 9 days old
 
-History & substance             55
-  H2  warn largest commit holds 58% of added lines
-Tests & CI                      90
-  T2  pass 9 of 10 test functions contain meaningful assertions
-Claims vs. receipts             50
-  C1  warn 2 of 4 claims link to evidence
+CATEGORY SCORES
+History & substance              ██████░░░░   55
+Tests & CI                       █████████░   90
+Claims vs. receipts              █████░░░░░   50
+
+EVIDENCE CHECKS
+
+History & substance
+  H2  ! WARN largest commit holds 58% of added lines
+
+Tests & CI
+  T2  ✓ PASS 9 of 10 test functions contain meaningful assertions
 ```
 
-Every result carries short evidence such as paths, line numbers, commit hashes, and counts. JSON output
-is deterministic for an injected analysis time and is documented by
+Every result carries short evidence such as paths, line numbers, commit hashes, and counts. All report
+formats are deterministic for an injected analysis time. JSON is documented by
 [`docs/REPORT_SCHEMA.json`](docs/REPORT_SCHEMA.json).
 
 ## Configuration

@@ -24,3 +24,20 @@ default.
 
 The GitHub owner/repository and real calibration labels remain unset because they require owner input.
 No AI-disclosure footer was added; the neutral I1 check reports only disclosures that actually exist.
+
+## 2026-10-01: Report rendering and dependencies
+
+Text, JSON, Markdown, and HTML are adapters behind one rendering seam. The shared report view contains
+only deterministic analysis results and deterministic presentation summaries; format-specific details
+remain inside their adapters.
+
+Coloured terminal output and HTML generation use only the Python standard library. This preserves the
+zero-runtime-dependency installation and keeps text colour policy at the CLI, where TTY and environment
+information is available.
+
+## 2026-10-01: Self-contained HTML reports
+
+HTML reports contain packaged templates with inline CSS and SVG but no JavaScript, remote resources,
+or generated timestamp. Target-provided content is escaped, evidence is rendered as text rather than
+as local links, and a restrictive Content Security Policy disables active and remote content. These
+constraints keep reports portable, deterministic, and safe to open from untrusted repository scans.
