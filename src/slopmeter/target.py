@@ -12,6 +12,7 @@ from pathlib import Path
 from slopmeter.repo import RepoError
 
 GITHUB_URL = re.compile(r"^(?:https://github\.com/|git@github\.com:)([^/]+)/([^/#]+?)(?:\.git)?/?$")
+CLONE_TIMEOUT_SECONDS = 30
 
 
 @dataclass(frozen=True)
@@ -53,7 +54,12 @@ def origin_slug(path: Path) -> OriginResolution:
 
 
 @contextmanager
-def materialize(target: str, online: bool) -> Iterator[tuple[Path, OriginResolution]]:
+def materialize(
+    target: str,
+    online: bool,
+    *,
+    max_commits: int = 5000,
+) -> Iterator[tuple[Path, OriginResolution]]:
     if "://" not in target and not target.startswith("git@"):
         path = Path(target).expanduser().resolve()
         yield path, origin_slug(path)
@@ -70,7 +76,8 @@ def materialize(target: str, online: bool) -> Iterator[tuple[Path, OriginResolut
         command = [
             "git", "-c", "core.hooksPath=/dev/null", "-c", "protocol.file.allow=never",
             "-c", "filter.lfs.smudge=", "-c", "filter.lfs.required=false",
-            "clone", "--no-recurse-submodules", "--quiet", target, str(destination),
+            "clone", "--no-recurse-submodules", "--quiet", "--single-branch",
+            f"--depth={max(1, max_commits)}", target, str(destination),
         ]
         try:
             completed = subprocess.run(
@@ -78,7 +85,7 @@ def materialize(target: str, online: bool) -> Iterator[tuple[Path, OriginResolut
                 stdin=subprocess.DEVNULL,
                 capture_output=True,
                 text=True,
-                timeout=120,
+                timeout=CLONE_TIMEOUT_SECONDS,
                 check=False,
                 env={
                     **os.environ,
@@ -87,7 +94,11 @@ def materialize(target: str, online: bool) -> Iterator[tuple[Path, OriginResolut
                     "GIT_TERMINAL_PROMPT": "0",
                 },
             )
-        except (OSError, subprocess.TimeoutExpired) as exc:
+        except subprocess.TimeoutExpired as exc:
+            raise RepoError(
+                f"clone timed out after {CLONE_TIMEOUT_SECONDS} seconds"
+            ) from exc
+        except OSError as exc:
             raise RepoError(f"clone failed safely: {exc}") from exc
         if completed.returncode != 0:
             detail = completed.stderr.strip().splitlines()[-1] if completed.stderr.strip() else "unknown error"

@@ -117,9 +117,20 @@ def main(argv: list[str] | None = None) -> int:
         print("--deep-stars requires --online", file=sys.stderr)
         return 2
     try:
-        with ProgressIndicator():
+        with ProgressIndicator() as progress:
+            progress.update(5, "Loading configuration")
             config = load_config(args.config)
-            with materialize(args.target, args.online) as (target, origin):
+            remote_target = "://" in args.target or args.target.startswith("git@")
+            progress.update(
+                15,
+                "Cloning remote repository" if remote_target else "Preparing local repository",
+            )
+            with materialize(
+                args.target,
+                args.online,
+                max_commits=args.max_commits,
+            ) as (target, origin):
+                progress.update(25, "Indexing repository files")
                 repo = RepoContext(target, config=config, max_commits=args.max_commits)
                 github_client = (
                     GitHubClient(*origin.slug, token=args.token or os.environ.get("GITHUB_TOKEN"))
@@ -133,7 +144,9 @@ def main(argv: list[str] | None = None) -> int:
                     github_client=github_client,
                     deep_stars=args.deep_stars,
                     github_unavailable_reason=origin.reason if args.online else None,
+                    progress=progress.update,
                 )
+                progress.update(95, "Rendering report")
                 report = render(
                     args.format,
                     args.target,
@@ -144,6 +157,7 @@ def main(argv: list[str] | None = None) -> int:
                 )
                 if args.output:
                     _write_output(args.output, report)
+                progress.update(100, "Complete")
         if not args.output:
             print(report, end="")
     except (OSError, ValueError, RepoError) as exc:

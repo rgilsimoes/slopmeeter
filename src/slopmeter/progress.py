@@ -20,10 +20,11 @@ STATUS_MESSAGES = (
 )
 
 SPINNER_FRAMES = ("⠋", "⠙", "⠹", "⠸", "⠼", "⠴", "⠦", "⠧", "⠇", "⠏")
+BAR_WIDTH = 20
 
 
 class ProgressIndicator:
-    """A transient terminal spinner that stays out of redirected output."""
+    """A transient, stage-aware progress bar that stays out of redirected output."""
 
     def __init__(
         self,
@@ -44,6 +45,17 @@ class ProgressIndicator:
         )
         self._stopped = threading.Event()
         self._thread: threading.Thread | None = None
+        self._state_lock = threading.Lock()
+        self._write_lock = threading.Lock()
+        self._percent = 0
+        self._stage = "Starting analysis"
+
+    def update(self, percent: int, stage: str) -> None:
+        """Advance to a real generation stage without allowing progress to move backwards."""
+        bounded = max(0, min(100, int(percent)))
+        with self._state_lock:
+            self._percent = max(self._percent, bounded)
+            self._stage = stage
 
     def __enter__(self) -> ProgressIndicator:
         if not self.enabled:
@@ -79,7 +91,15 @@ class ProgressIndicator:
         elapsed = 0.0
 
         while not self._stopped.is_set():
-            self._write(f"\r\x1b[2K{SPINNER_FRAMES[frame_index]} {messages[message_index]}…")
+            with self._state_lock:
+                percent = self._percent
+                stage = self._stage
+            filled = round(BAR_WIDTH * percent / 100)
+            bar = "█" * filled + "░" * (BAR_WIDTH - filled)
+            self._write(
+                f"\r\x1b[2K{SPINNER_FRAMES[frame_index]} [{bar}] {percent:3d}% "
+                f"{stage} · {messages[message_index]}…"
+            )
             frame_index = (frame_index + 1) % len(SPINNER_FRAMES)
 
             if self._stopped.wait(self.interval):
@@ -91,7 +111,8 @@ class ProgressIndicator:
 
     def _write(self, content: str) -> None:
         try:
-            self.stream.write(content)
-            self.stream.flush()
+            with self._write_lock:
+                self.stream.write(content)
+                self.stream.flush()
         except (OSError, ValueError):
             self._stopped.set()

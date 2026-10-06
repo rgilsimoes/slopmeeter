@@ -100,7 +100,7 @@ complete successfully. Without it, reports continue to be written to stdout.
 ## Text sample
 
 ```text
-SLOP MEETER v0.1.0
+SLOP MEETER v0.2.0
 score the evidence, not the vibes
 target  ./some-tool
 ────────────────────────────────────────────────────────────────────────────────────────────────

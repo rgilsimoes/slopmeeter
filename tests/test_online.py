@@ -1,4 +1,8 @@
+import time
 from datetime import UTC, datetime, timedelta
+from unittest.mock import patch
+
+import pytest
 
 from slopmeter.analyzer import analyze
 from slopmeter.checks import online
@@ -100,3 +104,20 @@ def test_analyzer_propagates_the_github_resolution_failure(tmp_path):
 
     assert all(item.status == "na" for item in maintenance)
     assert all("origin is not a supported GitHub URL" in item.message for item in maintenance)
+
+
+def test_github_lookups_stop_when_the_total_time_budget_is_exhausted(monkeypatch):
+    moments = iter((100.0, 121.0))
+    monkeypatch.setattr(time, "monotonic", lambda: next(moments))
+    client = online.GitHubClient("owner", "repo", timeout=5, total_timeout=20)
+
+    with patch(
+        "slopmeter.checks.online.urllib.request.urlopen",
+        side_effect=OSError("offline"),
+    ) as request, pytest.raises(online.GitHubError, match="time budget of 20 seconds"):
+        try:
+            client.repository()
+        except online.GitHubError:
+            client.repository()
+
+    assert request.call_count == 1

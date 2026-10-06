@@ -4,8 +4,11 @@ All notable changes to Slop Meeter are documented here.
 
 ## Unreleased
 
-- Added an interactive progress spinner with rotating Slop Meeter status messages; it stays quiet for
-  pipes and redirected output.
+## 0.2.0 — 2026-10-06
+
+- Replaced the generation spinner with a stage-aware percentage bar while preserving the rotating
+  Slop Meeter status messages; it stays quiet for pipes and redirected output.
+- Bounded remote clones and online lookups with shorter deadlines and a total network time budget.
 - Added accessible ANSI-coloured text reports with automatic TTY, `NO_COLOR`, and `TERM=dumb`
   handling plus explicit `--color` control.
 - Added deterministic, responsive, printable, and self-contained HTML reports with escaped repository

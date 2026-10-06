@@ -138,3 +138,30 @@ def test_html_report_can_be_written_from_the_cli(tmp_path, capsys):
     document = destination.read_text(encoding="utf-8")
     assert document.startswith("<!doctype html>\n")
     assert "Repository evidence report" in document
+
+
+def test_cli_reports_generation_stages_and_completion(tmp_path, capsys, monkeypatch):
+    (tmp_path / "README.md").write_text("# Tiny\n", encoding="utf-8")
+    updates = []
+
+    class RecordingProgress:
+        def __enter__(self):
+            return self
+
+        def __exit__(self, *args):
+            pass
+
+        def update(self, percent, stage):
+            updates.append((percent, stage))
+
+    monkeypatch.setattr(cli, "ProgressIndicator", RecordingProgress)
+
+    assert main([str(tmp_path), "--format", "json"]) == 0
+    capsys.readouterr()
+
+    assert updates[0] == (5, "Loading configuration")
+    assert (15, "Preparing local repository") in updates
+    assert (25, "Indexing repository files") in updates
+    assert (95, "Rendering report") in updates
+    assert updates[-1] == (100, "Complete")
+    assert [percent for percent, _ in updates] == sorted(percent for percent, _ in updates)

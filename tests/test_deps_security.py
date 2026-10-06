@@ -1,4 +1,5 @@
 import json
+import time
 import urllib.error
 from unittest.mock import patch
 
@@ -86,3 +87,20 @@ def test_registry_failure_reason_is_preserved(tmp_path):
 
     assert checked.status == "warn"
     assert checked.evidence == ["pypi:requests: network error: offline"]
+
+
+def test_registry_lookups_stop_when_the_total_time_budget_is_exhausted(monkeypatch):
+    moments = iter((100.0, 116.0))
+    monkeypatch.setattr(time, "monotonic", lambda: next(moments))
+    client = deps.RegistryClient(timeout=5, total_timeout=15)
+
+    with patch(
+        "slopmeter.checks.deps.urllib.request.urlopen",
+        side_effect=urllib.error.URLError("offline"),
+    ) as request:
+        client.lookup("pypi", "first")
+        result = client.lookup("pypi", "second")
+
+    assert request.call_count == 1
+    assert result.state is deps.DependencyState.UNKNOWN
+    assert result.reason == "online lookup time budget of 15 seconds reached"

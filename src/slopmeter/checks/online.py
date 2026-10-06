@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import time
 import urllib.error
 import urllib.parse
 import urllib.request
@@ -29,14 +30,35 @@ class RateLimitError(GitHubError):
 
 
 class GitHubClient:
-    def __init__(self, owner: str, repo: str, token: str | None = None, timeout: float = 10.0, request_cap: int = 60):
+    def __init__(
+        self,
+        owner: str,
+        repo: str,
+        token: str | None = None,
+        timeout: float = 5.0,
+        request_cap: int = 30,
+        total_timeout: float = 20.0,
+    ):
         self.owner = owner
         self.repo = repo
         self.token = token
         self.timeout = timeout
         self.request_cap = request_cap
+        self.total_timeout = total_timeout
         self.requests = 0
         self._cache: dict[str, Any] = {}
+        self._started_at: float | None = None
+
+    def _available_timeout(self) -> float:
+        now = time.monotonic()
+        if self._started_at is None:
+            self._started_at = now
+        remaining = self.total_timeout - (now - self._started_at)
+        if remaining <= 0:
+            raise GitHubError(
+                f"online lookup time budget of {self.total_timeout:g} seconds reached"
+            )
+        return min(self.timeout, remaining)
 
     def _get(self, path: str, accept: str = "application/vnd.github+json") -> Any:
         key = f"{accept}:{path}"
@@ -44,6 +66,7 @@ class GitHubClient:
             return self._cache[key]
         if self.requests >= self.request_cap:
             raise RateLimitError(f"request cap of {self.request_cap} reached")
+        request_timeout = self._available_timeout()
         self.requests += 1
         headers = {
             "Accept": accept,
@@ -54,7 +77,7 @@ class GitHubClient:
             headers["Authorization"] = f"Bearer {self.token}"
         request = urllib.request.Request(f"https://api.github.com{path}", headers=headers)
         try:
-            with urllib.request.urlopen(request, timeout=self.timeout) as response:
+            with urllib.request.urlopen(request, timeout=request_timeout) as response:
                 value = json.loads(response.read().decode("utf-8"))
                 self._cache[key] = value
                 return value

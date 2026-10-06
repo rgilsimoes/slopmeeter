@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 import re
+import time
 import tomllib
 import urllib.error
 import urllib.parse
@@ -41,20 +42,42 @@ class DependencyLookup(Protocol):
 
 
 class RegistryClient:
-    def __init__(self, timeout: float = 10.0, request_cap: int = 100):
+    def __init__(
+        self,
+        timeout: float = 5.0,
+        request_cap: int = 25,
+        total_timeout: float = 15.0,
+    ):
         self.timeout = timeout
         self.request_cap = request_cap
+        self.total_timeout = total_timeout
         self.requests = 0
+        self._started_at: float | None = None
+
+    def _available_timeout(self) -> float | None:
+        now = time.monotonic()
+        if self._started_at is None:
+            self._started_at = now
+        remaining = self.total_timeout - (now - self._started_at)
+        if remaining <= 0:
+            return None
+        return min(self.timeout, remaining)
 
     def lookup(self, ecosystem: str, name: str) -> DependencyLookupResult:
         if self.requests >= self.request_cap:
             return DependencyLookupResult(DependencyState.UNKNOWN, "request limit reached")
+        request_timeout = self._available_timeout()
+        if request_timeout is None:
+            return DependencyLookupResult(
+                DependencyState.UNKNOWN,
+                f"online lookup time budget of {self.total_timeout:g} seconds reached",
+            )
         self.requests += 1
         quoted = urllib.parse.quote(name, safe="" if ecosystem == "pypi" else "@")
         url = f"https://pypi.org/pypi/{quoted}/json" if ecosystem == "pypi" else f"https://registry.npmjs.org/{quoted}"
         request = urllib.request.Request(url, headers={"User-Agent": "slopmeter/0.1 (+https://github.com/)"})
         try:
-            with urllib.request.urlopen(request, timeout=self.timeout) as response:
+            with urllib.request.urlopen(request, timeout=request_timeout) as response:
                 if 200 <= response.status < 300:
                     return DependencyLookupResult(DependencyState.EXISTS)
                 return DependencyLookupResult(DependencyState.UNKNOWN, f"HTTP {response.status}")

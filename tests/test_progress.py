@@ -24,6 +24,20 @@ def test_progress_animates_with_a_playful_status_and_clears_the_line(monkeypatch
     assert output.endswith("\r\x1b[2K")
 
 
+def test_progress_reports_real_percentage_and_stage(monkeypatch):
+    monkeypatch.setenv("TERM", "xterm-256color")
+    terminal = TtyBuffer()
+
+    with ProgressIndicator(stream=terminal, interval=0.001) as progress:
+        progress.update(35, "Inspecting repository history")
+        time.sleep(0.005)
+
+    output = terminal.getvalue()
+    assert "35%" in output
+    assert "Inspecting repository history" in output
+    assert "[" in output and "]" in output
+
+
 @pytest.mark.parametrize("term", ["dumb", "xterm-256color"])
 def test_progress_is_quiet_when_the_terminal_cannot_animate(monkeypatch, term):
     monkeypatch.setenv("TERM", term)
