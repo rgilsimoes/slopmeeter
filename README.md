@@ -1,5 +1,17 @@
 # Slop Meeter
 
+<p align="center">
+  <img src="docs/slopmeeter-logo.png" alt="Slop Meeter logo" width="420">
+</p>
+
+<p align="center">
+  <a href="LICENSE"><picture><source media="(prefers-color-scheme: dark)" srcset="https://shieldcn.dev/github/license/rgilsimoes/slopmeeter.svg?variant=outline&amp;mode=dark"><img alt="MIT license" src="https://shieldcn.dev/github/license/rgilsimoes/slopmeeter.svg?variant=outline&amp;mode=light"></picture></a>
+  <a href="https://github.com/rgilsimoes/slopmeeter/actions/workflows/ci.yml"><picture><source media="(prefers-color-scheme: dark)" srcset="https://shieldcn.dev/github/ci/rgilsimoes/slopmeeter.svg?workflow=ci.yml&amp;branch=main&amp;variant=outline&amp;mode=dark"><img alt="CI status" src="https://shieldcn.dev/github/ci/rgilsimoes/slopmeeter.svg?workflow=ci.yml&amp;branch=main&amp;variant=outline&amp;mode=light"></picture></a>
+  <a href="https://github.com/rgilsimoes/slopmeeter/tags"><picture><source media="(prefers-color-scheme: dark)" srcset="https://shieldcn.dev/github/tag/rgilsimoes/slopmeeter.svg?variant=outline&amp;mode=dark"><img alt="Latest version" src="https://shieldcn.dev/github/tag/rgilsimoes/slopmeeter.svg?variant=outline&amp;mode=light"></picture></a>
+  <a href="pyproject.toml"><picture><source media="(prefers-color-scheme: dark)" srcset="https://shieldcn.dev/badge/python-3.11%2B-blue.svg?variant=outline&amp;mode=dark&amp;logo=python"><img alt="Python 3.11 or newer" src="https://shieldcn.dev/badge/python-3.11%2B-blue.svg?variant=outline&amp;mode=light&amp;logo=python"></picture></a>
+  <a href="pyproject.toml"><picture><source media="(prefers-color-scheme: dark)" srcset="https://shieldcn.dev/badge/runtime_deps-0-brightgreen.svg?variant=outline&amp;mode=dark"><img alt="Zero runtime dependencies" src="https://shieldcn.dev/badge/runtime_deps-0-brightgreen.svg?variant=outline&amp;mode=light"></picture></a>
+</p>
+
 **Score the evidence, not the vibes.** Slop Meeter is a local command-line tool that asks whether a
 software repository has receipts for what it claims: meaningful history, tests that assert things,
 reproducible claims, release hygiene, plausible attention, and signs of active maintenance.
