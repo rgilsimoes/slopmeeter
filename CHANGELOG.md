@@ -4,6 +4,9 @@ All notable changes to Slop Meeter are documented here.
 
 ## Unreleased
 
+- Aligned the coloured terminal report with the approved prototype using a block banner,
+  three-column summary, segmented category bars, and reformatted complete evidence checks.
+
 ## 0.2.0 — 2026-10-06
 
 - Replaced the generation spinner with a stage-aware percentage bar while preserving the rotating

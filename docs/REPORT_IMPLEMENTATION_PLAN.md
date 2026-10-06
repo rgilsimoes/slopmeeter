@@ -114,8 +114,8 @@ Adapt the approved proposal to a width-stable terminal layout:
 1. Header: tool name, version, target, and the existing tagline.
 2. Summary: evidence score, slop level, confidence/mode, verdict, and maturity note.
 3. Category scores: aligned labels, a ten-segment bar, and numeric score.
-4. Evidence checks: grouped by category, with coloured status label, check ID, message, and indented
-   evidence.
+4. Evidence checks: every result grouped by category, with coloured status label, check ID, message,
+   and indented evidence.
 5. Information checks: a separate muted section marked “not scored”.
 
 Do not make output depend on the detected terminal width in the first version; fixed formatting is

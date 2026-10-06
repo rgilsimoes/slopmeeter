@@ -112,26 +112,40 @@ complete successfully. Without it, reports continue to be written to stdout.
 ## Text sample
 
 ```text
-SLOP MEETER v0.2.0
+███████╗██╗      ██████╗ ██████╗     ███╗   ███╗███████╗███████╗████████╗███████╗██████╗
+██╔════╝██║     ██╔═══██╗██╔══██╗    ████╗ ████║██╔════╝██╔════╝╚══██╔══╝██╔════╝██╔══██╗
+███████╗██║     ██║   ██║██████╔╝    ██╔████╔██║█████╗  █████╗     ██║   █████╗  ██████╔╝
+╚════██║██║     ██║   ██║██╔═══╝     ██║╚██╔╝██║██╔══╝  ██╔══╝     ██║   ██╔══╝  ██╔══██╗
+███████║███████╗╚██████╔╝██║         ██║ ╚═╝ ██║███████╗███████╗   ██║   ███████╗██║  ██║
+╚══════╝╚══════╝ ╚═════╝ ╚═╝         ╚═╝     ╚═╝╚══════╝╚══════╝   ╚═╝   ╚══════╝╚═╝  ╚═╝
 score the evidence, not the vibes
-target  ./some-tool
-────────────────────────────────────────────────────────────────────────────────────────────────
-EVIDENCE SCORE  64 / 100            SLOP LEVEL  4 / 10        CONFIDENCE  83% · offline
-VERDICT         Promising. Some receipts.
-MATURITY        Too early to tell: 11 commits, 9 days old
+v0.2.0 · target ./some-tool
 
-CATEGORY SCORES
-History & substance              ██████░░░░   55
-Tests & CI                       █████████░   90
-Claims vs. receipts              █████░░░░░   50
+────────────────────────────────────────────────────────────────────────────────────────────────────────
+64 / 100                   │ Slop level  4 / 10           │ Promising. Some receipts.
+Repository evidence score  │ Confidence  83% · offline    │ Too early to tell · 11 commits · 9 days old
+────────────────────────────────────────────────────────────────────────────────────────────────────────
 
-EVIDENCE CHECKS
+Category scores
+  History & substance             ■ ■ ■ ■ ■ ■ □ □ □ □    55
+  Tests & CI                      ■ ■ ■ ■ ■ ■ ■ ■ ■ □    90
+  Claims vs. receipts             ■ ■ ■ ■ ■ □ □ □ □ □    50
+  Docs, release & composition     ■ ■ ■ ■ ■ ■ ■ □ □ □    72
+  Dependencies & security         ■ ■ ■ ■ ■ ■ ■ ■ □ □    80
+
+────────────────────────────────────────────────────────────────────────────────────────────────────────
+
+Evidence checks
 
 History & substance
-  H2  ! WARN largest commit holds 58% of added lines
+  H2  │ ! WARN │ largest commit holds 58% of added lines
+                 ↳ commit a1b2c3: 58% of added lines
 
 Tests & CI
-  T2  ✓ PASS 9 of 10 test functions contain meaningful assertions
+  T2  │ ✓ PASS │ 9 of 10 test functions contain meaningful assertions
+
+Claims vs. receipts
+  C1  │ ! WARN │ 2 of 4 claims link to evidence
 ```
 
 Every result carries short evidence such as paths, line numbers, commit hashes, and counts. All report

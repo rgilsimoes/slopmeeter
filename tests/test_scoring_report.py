@@ -75,8 +75,47 @@ def test_coloured_text_is_plain_text_with_semantic_ansi_styles():
     assert "! WARN" in plain
     assert "× FAIL" in plain
     assert "✓ PASS" in plain
-    assert "– N/A" in plain
-    assert "CATEGORY SCORES" in plain
+    assert "\x1b[1;33m! WARN\x1b[0m" in coloured
+    assert "\x1b[1;31m× FAIL\x1b[0m" in coloured
+    assert "\x1b[1;32m✓ PASS\x1b[0m" in coloured
+    assert plain.startswith("███████╗██╗")
+    assert "score the evidence, not the vibes" in plain
+    assert "Repository evidence score" in plain
+    assert "│ Slop level" in plain
+    assert "Category scores" in plain
+    assert "■" in plain and "□" in plain
+    assert "Evidence checks" in plain
+    assert plain.index("H1  │") < plain.index("H2  │") < plain.index("H4  │")
+    assert "S2  │ – N/A" in plain
+
+
+def test_text_report_keeps_every_result_and_its_evidence():
+    results = [
+        result("H1", "fail", "too few commits", ["commit count: 3"]),
+        result("H2", "fail", "one oversized commit"),
+        result("H3", "fail", "short history"),
+        result("T1", "pass", "tests are present"),
+        result("T2", "pass", "tests contain assertions", ["9 of 10 test functions"]),
+    ]
+    score = aggregate(results, (), NOW)
+
+    plain = render("text", ".", results, score, False, color=False)
+
+    for check_id in ("H1", "H2", "H3", "T1", "T2"):
+        assert f"{check_id}  │" in plain
+    assert "↳ commit count: 3" in plain
+    assert "↳ 9 of 10 test functions" in plain
+
+
+def test_text_report_styles_not_applicable_results():
+    results = [result("S2", "na", "offline")]
+    score = aggregate(results, (), NOW)
+
+    plain = render("text", ".", results, score, False, color=False)
+    coloured = render("text", ".", results, score, False, color=True)
+
+    assert "S2  │ – N/A  │ offline" in plain
+    assert "\x1b[90m– N/A \x1b[0m" in coloured
 
 
 def test_html_report_is_self_contained_safe_and_prioritises_inspection():
