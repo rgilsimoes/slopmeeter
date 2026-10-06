@@ -7,6 +7,7 @@ import urllib.error
 import urllib.parse
 import urllib.request
 from dataclasses import dataclass
+from enum import Enum
 from typing import Protocol
 
 from slopmeter.checks.base import CheckResult, result
@@ -23,8 +24,20 @@ class Dependency:
     source: str
 
 
+class DependencyState(Enum):
+    EXISTS = "exists"
+    MISSING = "missing"
+    UNKNOWN = "unknown"
+
+
+@dataclass(frozen=True)
+class DependencyLookupResult:
+    state: DependencyState
+    reason: str | None = None
+
+
 class DependencyLookup(Protocol):
-    def exists(self, ecosystem: str, name: str) -> bool | None: ...
+    def lookup(self, ecosystem: str, name: str) -> DependencyLookupResult: ...
 
 
 class RegistryClient:
@@ -33,22 +46,25 @@ class RegistryClient:
         self.request_cap = request_cap
         self.requests = 0
 
-    def exists(self, ecosystem: str, name: str) -> bool | None:
+    def lookup(self, ecosystem: str, name: str) -> DependencyLookupResult:
         if self.requests >= self.request_cap:
-            return None
+            return DependencyLookupResult(DependencyState.UNKNOWN, "request limit reached")
         self.requests += 1
         quoted = urllib.parse.quote(name, safe="" if ecosystem == "pypi" else "@")
         url = f"https://pypi.org/pypi/{quoted}/json" if ecosystem == "pypi" else f"https://registry.npmjs.org/{quoted}"
         request = urllib.request.Request(url, headers={"User-Agent": "slopmeter/0.1 (+https://github.com/)"})
         try:
             with urllib.request.urlopen(request, timeout=self.timeout) as response:
-                return 200 <= response.status < 300
+                if 200 <= response.status < 300:
+                    return DependencyLookupResult(DependencyState.EXISTS)
+                return DependencyLookupResult(DependencyState.UNKNOWN, f"HTTP {response.status}")
         except urllib.error.HTTPError as exc:
             if exc.code == 404:
-                return False
-            return None
-        except (OSError, urllib.error.URLError):
-            return None
+                return DependencyLookupResult(DependencyState.MISSING)
+            return DependencyLookupResult(DependencyState.UNKNOWN, f"HTTP {exc.code}")
+        except (OSError, urllib.error.URLError) as exc:
+            detail = exc.reason if isinstance(exc, urllib.error.URLError) else str(exc)
+            return DependencyLookupResult(DependencyState.UNKNOWN, f"network error: {detail}")
 
 
 def _python_requirement(value: str, source: str) -> Dependency | None:
@@ -129,12 +145,12 @@ def check_s2(
     missing: list[str] = []
     unknown: list[str] = []
     for item in declared:
-        state = client.exists(item.ecosystem, item.name)
+        lookup = client.lookup(item.ecosystem, item.name)
         label = f"{item.ecosystem}:{item.name}"
-        if state is False:
+        if lookup.state is DependencyState.MISSING:
             missing.append(label)
-        elif state is None:
-            unknown.append(label)
+        elif lookup.state is DependencyState.UNKNOWN:
+            unknown.append(f"{label}: {lookup.reason or 'unknown reason'}")
     if missing:
         return result("S2", "fail", f"{len(missing)} declared dependencies were not found", missing)
     if unknown:
@@ -202,4 +218,3 @@ def run(repo: RepoContext, config: Config, online: bool = False, client: Depende
         results.append(result("S2", "na", "online check disabled"))
     results.extend([check_s3(repo, config), check_s4(repo, config)])
     return results
-

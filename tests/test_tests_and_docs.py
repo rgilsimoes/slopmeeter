@@ -35,6 +35,22 @@ def test_assertion_free_tests_fail(tmp_path):
     assert results["T2"].status == "fail"
 
 
+def test_python_syntax_errors_are_reported_and_prevent_a_pass(tmp_path):
+    repo = context(
+        tmp_path,
+        {
+            "tests/test_valid.py": "def test_valid():\n    assert 1 + 1 == 2\n",
+            "tests/test_broken.py": "def test_broken(:\n    assert False\n",
+        },
+    )
+
+    checked = tests.check_t2(repo, Config())
+
+    assert checked.status == "warn"
+    assert "1 test file could not be parsed" in checked.message
+    assert any("tests/test_broken.py" in item and "invalid syntax" in item for item in checked.evidence)
+
+
 def test_no_tests(tmp_path):
     repo = context(tmp_path, {"app.py": "value = 1\n"})
     results = {item.id: item for item in tests.run(repo, Config())}

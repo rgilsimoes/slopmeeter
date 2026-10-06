@@ -18,6 +18,7 @@ def analyze(
     dependency_client: deps.DependencyLookup | None = None,
     github_client: online_checks.GitHubData | None = None,
     deep_stars: bool = False,
+    github_unavailable_reason: str | None = None,
 ) -> tuple[list[CheckResult], tuple[Commit, ...], Score]:
     commits = parse_history(repo)
     results = [
@@ -36,7 +37,14 @@ def analyze(
             ]
         )
     else:
-        results.extend(online_checks.run(github_client, now, deep_stars=deep_stars))
+        results.extend(
+            online_checks.run(
+                github_client,
+                now,
+                deep_stars=deep_stars,
+                unavailable_reason=github_unavailable_reason,
+            )
+        )
     results.extend(info.run(repo))
     results = [replace(item, weight=repo.config.weight(item.id, item.weight)) for item in results]
     return results, commits, aggregate(results, commits, now)

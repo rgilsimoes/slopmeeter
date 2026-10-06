@@ -1,9 +1,10 @@
+import subprocess
 from pathlib import Path
 
 import pytest
 
 from slopmeter.repo import RepoError
-from slopmeter.target import github_slug, materialize
+from slopmeter.target import github_slug, materialize, origin_slug
 
 
 def test_github_slug():
@@ -12,9 +13,10 @@ def test_github_slug():
 
 
 def test_local_materialize(tmp_path):
-    with materialize(str(tmp_path), False) as (path, slug):
+    with materialize(str(tmp_path), False) as (path, origin):
         assert path == Path(tmp_path).resolve()
-        assert slug is None
+        assert origin.slug is None
+        assert origin.reason is not None
 
 
 def test_url_requires_explicit_online():
@@ -22,3 +24,15 @@ def test_url_requires_explicit_online():
         "https://github.com/owner/project", False
     ):
         pass
+
+
+def test_origin_timeout_preserves_the_failure_reason(tmp_path, monkeypatch):
+    def time_out(*args, **kwargs):
+        raise subprocess.TimeoutExpired("git", 10)
+
+    monkeypatch.setattr("slopmeter.target.subprocess.run", time_out)
+
+    resolution = origin_slug(tmp_path)
+
+    assert resolution.slug is None
+    assert resolution.reason == "git origin lookup timed out after 10 seconds"

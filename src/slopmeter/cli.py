@@ -119,11 +119,11 @@ def main(argv: list[str] | None = None) -> int:
     try:
         with ProgressIndicator():
             config = load_config(args.config)
-            with materialize(args.target, args.online) as (target, slug):
+            with materialize(args.target, args.online) as (target, origin):
                 repo = RepoContext(target, config=config, max_commits=args.max_commits)
                 github_client = (
-                    GitHubClient(*slug, token=args.token or os.environ.get("GITHUB_TOKEN"))
-                    if args.online and slug
+                    GitHubClient(*origin.slug, token=args.token or os.environ.get("GITHUB_TOKEN"))
+                    if args.online and origin.slug
                     else None
                 )
                 results, _, score = analyze(
@@ -132,6 +132,7 @@ def main(argv: list[str] | None = None) -> int:
                     online=args.online,
                     github_client=github_client,
                     deep_stars=args.deep_stars,
+                    github_unavailable_reason=origin.reason if args.online else None,
                 )
                 report = render(
                     args.format,

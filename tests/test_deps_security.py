@@ -1,4 +1,6 @@
 import json
+import urllib.error
+from unittest.mock import patch
 
 from slopmeter.checks import deps
 from slopmeter.config import Config
@@ -10,9 +12,14 @@ class FakeRegistry:
         self.values = values
         self.calls = []
 
-    def exists(self, ecosystem, name):
+    def lookup(self, ecosystem, name):
         self.calls.append((ecosystem, name))
-        return self.values.get((ecosystem, name))
+        value = self.values.get((ecosystem, name))
+        if value is True:
+            return deps.DependencyLookupResult(deps.DependencyState.EXISTS)
+        if value is False:
+            return deps.DependencyLookupResult(deps.DependencyState.MISSING)
+        return deps.DependencyLookupResult(deps.DependencyState.UNKNOWN, "fake lookup unavailable")
 
 
 def repo_with(tmp_path, files):
@@ -65,3 +72,17 @@ def test_offline_run_does_not_call_registry(tmp_path):
     results = {item.id: item for item in deps.run(repo, Config(), online=False, client=client)}
     assert results["S2"].status == "na"
     assert client.calls == []
+
+
+def test_registry_failure_reason_is_preserved(tmp_path):
+    repo = repo_with(tmp_path, {"requirements.txt": "requests==2.32.0\n"})
+    client = deps.RegistryClient()
+
+    with patch(
+        "slopmeter.checks.deps.urllib.request.urlopen",
+        side_effect=urllib.error.URLError("offline"),
+    ):
+        checked = deps.check_s2(repo, Config(), client)
+
+    assert checked.status == "warn"
+    assert checked.evidence == ["pypi:requests: network error: offline"]

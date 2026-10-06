@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import ast
 import re
+from dataclasses import dataclass
 
 from slopmeter.checks.base import CheckResult, result
 from slopmeter.config import Config
@@ -11,6 +12,12 @@ TEST_SUFFIXES = (".test.js", ".test.jsx", ".test.ts", ".test.tsx", "_test.go")
 TEST_DIRS = {"tests", "test", "__tests__", "spec"}
 CI_PATHS = (".github/workflows/", ".gitlab-ci.yml", ".circleci/", "azure-pipelines.yml")
 TEST_COMMAND = re.compile(r"(?:pytest|unittest|npm\s+(?:run\s+)?test|pnpm\s+test|yarn\s+test|go\s+test|cargo\s+test|mvn\s+test|gradle\s+test)", re.I)
+
+
+@dataclass(frozen=True)
+class PythonTestParse:
+    functions: tuple[tuple[str, bool], ...] = ()
+    error: str | None = None
 
 
 def is_test_file(file: FileRecord) -> bool:
@@ -50,11 +57,12 @@ def _is_trivial_assert(node: ast.Assert) -> bool:
     return isinstance(value, ast.Constant) and bool(value.value)
 
 
-def _python_test_functions(text: str) -> list[tuple[str, bool]]:
+def _python_test_functions(text: str) -> PythonTestParse:
     try:
         tree = ast.parse(text)
-    except SyntaxError:
-        return []
+    except SyntaxError as exc:
+        location = f"line {exc.lineno}" if exc.lineno is not None else "unknown line"
+        return PythonTestParse(error=f"{exc.msg} at {location}")
     found: list[tuple[str, bool]] = []
     for node in ast.walk(tree):
         if not isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)) or not node.name.startswith("test"):
@@ -70,7 +78,7 @@ def _python_test_functions(text: str) -> list[tuple[str, bool]]:
                 ):
                     meaningful = True
         found.append((node.name, meaningful))
-    return found
+    return PythonTestParse(tuple(found))
 
 
 def _js_test_functions(text: str) -> list[tuple[str, bool]]:
@@ -88,6 +96,7 @@ def _js_test_functions(text: str) -> list[tuple[str, bool]]:
 
 def check_t2(repo: RepoContext, config: Config) -> CheckResult:
     tests: list[tuple[str, str, bool]] = []
+    parse_errors: list[str] = []
     supported_files = 0
     for file in repo.files:
         if not is_test_file(file):
@@ -96,12 +105,21 @@ def check_t2(repo: RepoContext, config: Config) -> CheckResult:
         parsed: list[tuple[str, bool]] = []
         if file.suffix == ".py":
             supported_files += 1
-            parsed = _python_test_functions(text)
+            outcome = _python_test_functions(text)
+            parsed = list(outcome.functions)
+            if outcome.error:
+                parse_errors.append(f"{file.relative}: {outcome.error}")
         elif file.suffix in {".js", ".jsx", ".ts", ".tsx"}:
             supported_files += 1
             parsed = _js_test_functions(text)
         tests.extend((file.relative, name, assertion) for name, assertion in parsed)
-    if supported_files == 0 or not tests:
+    if supported_files == 0:
+        return result("T2", "na", "no supported test functions found")
+    if not tests:
+        if parse_errors:
+            count = len(parse_errors)
+            noun = "file" if count == 1 else "files"
+            return result("T2", "warn", f"{count} test {noun} could not be parsed", parse_errors[:20])
         return result("T2", "na", "no supported test functions found")
     asserted = sum(assertion for _, _, assertion in tests)
     share = asserted / len(tests)
@@ -112,7 +130,14 @@ def check_t2(repo: RepoContext, config: Config) -> CheckResult:
     else:
         status = "fail"
     missing = [f"{path}: {name}" for path, name, assertion in tests if not assertion]
-    return result("T2", status, f"{asserted} of {len(tests)} test functions contain meaningful assertions", missing[:20])
+    message = f"{asserted} of {len(tests)} test functions contain meaningful assertions"
+    if parse_errors:
+        count = len(parse_errors)
+        noun = "file" if count == 1 else "files"
+        message += f"; {count} test {noun} could not be parsed"
+        if status == "pass":
+            status = "warn"
+    return result("T2", status, message, (parse_errors + missing)[:20])
 
 
 def check_t3(repo: RepoContext, config: Config) -> CheckResult:
@@ -128,4 +153,3 @@ def check_t3(repo: RepoContext, config: Config) -> CheckResult:
 
 def run(repo: RepoContext, config: Config) -> list[CheckResult]:
     return [check_t1(repo, config), check_t2(repo, config), check_t3(repo, config)]
-

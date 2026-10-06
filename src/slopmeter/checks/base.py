@@ -51,7 +51,7 @@ CHECKS = [
     CheckDefinition("H4", "Commit messages", "history", 1, "Counts generic or very short commit messages.", "<20% pass; 20-50% warn; >50% fail", "Specific messages make history auditable."),
     CheckDefinition("H5", "Contributors", "history", 1, "Counts normalized non-bot author emails.", ">=3 pass; 2 warn; 1 warn", "Independent contributors are a mild corroborating signal."),
     CheckDefinition("T1", "Tests present", "tests", 4, "Finds conventional tests and compares test LOC with source LOC.", ">=15% pass; >0 warn; none fail", "Tests are reproducible evidence of behavior."),
-    CheckDefinition("T2", "Tests assert", "tests", 4, "Checks whether Python and JS/TS tests contain meaningful assertions.", ">=90% pass; 60-89% warn; <60% fail", "Test-shaped files without assertions provide weak evidence."),
+    CheckDefinition("T2", "Tests assert", "tests", 4, "Checks whether Python and JS/TS tests contain meaningful assertions.", ">=90% pass; 60-89% warn; <60% fail; Python parse errors prevent pass", "Test-shaped files without assertions provide weak evidence."),
     CheckDefinition("T3", "CI runs tests", "tests", 2, "Looks for CI configuration with a test command.", "CI + tests pass; CI without tests warn; no CI fail", "Automated execution makes tests more credible."),
     CheckDefinition("C1", "Claims have receipts", "claims", 5, "Matches quantitative or superlative claims and nearby evidence links.", ">=80% or no claims pass; 40-79% warn; <40% fail", "Strong claims should point to reproducible evidence."),
     CheckDefinition("C2", "Eval harness present", "claims", 3, "Looks for benchmark or evaluation scripts when claims exist.", "runnable harness pass; results only warn; claims without either fail", "A harness makes performance claims reproducible."),
@@ -86,4 +86,3 @@ def result(check_id: str, status: Status, message: str, evidence: list[str] | No
         evidence=evidence or [],
         requires_online=definition.requires_online,
     )
-

@@ -1,6 +1,8 @@
 from datetime import UTC, datetime, timedelta
 
+from slopmeter.analyzer import analyze
 from slopmeter.checks import online
+from slopmeter.repo import RepoContext
 
 NOW = datetime(2026, 1, 1, tzinfo=UTC)
 
@@ -77,3 +79,24 @@ def test_missing_github_identity_degrades_cleanly():
     results = online.run(None, NOW)
     assert all(item.status == "na" for item in results)
 
+
+def test_missing_github_identity_reports_the_resolution_failure():
+    results = online.run(None, NOW, unavailable_reason="git origin lookup timed out")
+
+    assert all(item.status == "na" for item in results)
+    assert all(item.message == "GitHub data unavailable: git origin lookup timed out" for item in results)
+
+
+def test_analyzer_propagates_the_github_resolution_failure(tmp_path):
+    (tmp_path / "README.md").write_text("# Example\n", encoding="utf-8")
+
+    results, _, _ = analyze(
+        RepoContext(tmp_path),
+        NOW,
+        online=True,
+        github_unavailable_reason="origin is not a supported GitHub URL",
+    )
+    maintenance = [item for item in results if item.id in {"M1", "M2", "M3"}]
+
+    assert all(item.status == "na" for item in maintenance)
+    assert all("origin is not a supported GitHub URL" in item.message for item in maintenance)

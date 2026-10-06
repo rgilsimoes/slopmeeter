@@ -30,7 +30,7 @@ days, the report also says “Too early to tell” without hiding the score.
 | ID | Weight | Thresholds | Rationale |
 |---|---:|---|---|
 | T1 Tests present | 4 | test/source LOC at least 15% pass; any lower nonzero ratio warn; none fail | Tests are reproducible evidence of behavior. Conventional test names and directories are recognized. |
-| T2 Tests assert | 4 | at least 90% pass; 60–89% warn; under 60% fail | Test-shaped files without meaningful assertions provide weak evidence. Python uses `ast`; JS/TS uses bounded regex inspection. |
+| T2 Tests assert | 4 | at least 90% pass; 60–89% warn; under 60% fail; Python parse errors prevent a pass | Test-shaped files without meaningful assertions provide weak evidence. Python uses `ast` and reports files it cannot parse; JS/TS uses bounded regex inspection. |
 | T3 CI runs tests | 2 | CI with a test command pass; CI without one warn; no CI fail | Automated execution makes tests more credible. |
 
 ## Claims versus receipts (category weight 20)

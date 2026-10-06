@@ -190,12 +190,22 @@ def check_m3(client: GitHubData, now: datetime, deep_stars: bool = False) -> Che
     return result("M3", status, f"star pattern is {wording}", evidence)
 
 
-def run(client: GitHubData | None, now: datetime, deep_stars: bool = False) -> list[CheckResult]:
+def run(
+    client: GitHubData | None,
+    now: datetime,
+    deep_stars: bool = False,
+    unavailable_reason: str | None = None,
+) -> list[CheckResult]:
     if client is None:
+        message = (
+            f"GitHub data unavailable: {unavailable_reason}"
+            if unavailable_reason
+            else "GitHub repository could not be identified"
+        )
         return [
-            result("M1", "na", "GitHub repository could not be identified"),
-            result("M2", "na", "GitHub repository could not be identified"),
-            result("M3", "na", "GitHub repository could not be identified"),
+            result("M1", "na", message),
+            result("M2", "na", message),
+            result("M3", "na", message),
         ]
     checks = (("M1", lambda: check_m1(client, now)), ("M2", lambda: check_m2(client)), ("M3", lambda: check_m3(client, now, deep_stars)))
     results: list[CheckResult] = []
@@ -207,4 +217,3 @@ def run(client: GitHubData | None, now: datetime, deep_stars: bool = False) -> l
         except (GitHubError, KeyError, TypeError, ValueError) as exc:
             results.append(result(check_id, "na", f"online data unavailable: {exc}"))
     return results
-

@@ -6,6 +6,7 @@ import subprocess
 import tempfile
 from collections.abc import Iterator
 from contextlib import contextmanager
+from dataclasses import dataclass
 from pathlib import Path
 
 from slopmeter.repo import RepoError
@@ -13,12 +14,18 @@ from slopmeter.repo import RepoError
 GITHUB_URL = re.compile(r"^(?:https://github\.com/|git@github\.com:)([^/]+)/([^/#]+?)(?:\.git)?/?$")
 
 
+@dataclass(frozen=True)
+class OriginResolution:
+    slug: tuple[str, str] | None = None
+    reason: str | None = None
+
+
 def github_slug(value: str) -> tuple[str, str] | None:
     match = GITHUB_URL.match(value.strip())
     return (match.group(1), match.group(2)) if match else None
 
 
-def origin_slug(path: Path) -> tuple[str, str] | None:
+def origin_slug(path: Path) -> OriginResolution:
     try:
         completed = subprocess.run(
             ["git", "-c", "core.hooksPath=/dev/null", "remote", "get-url", "origin"],
@@ -30,13 +37,23 @@ def origin_slug(path: Path) -> tuple[str, str] | None:
             check=False,
             env={**os.environ, "GIT_OPTIONAL_LOCKS": "0"},
         )
-    except (OSError, subprocess.TimeoutExpired):
-        return None
-    return github_slug(completed.stdout.strip()) if completed.returncode == 0 else None
+    except subprocess.TimeoutExpired:
+        return OriginResolution(reason="git origin lookup timed out after 10 seconds")
+    except OSError as exc:
+        return OriginResolution(reason=f"git origin lookup failed: {exc}")
+    if completed.returncode != 0:
+        detail = completed.stderr.strip().splitlines()
+        reason = detail[-1] if detail else "git command returned no origin"
+        return OriginResolution(reason=f"git origin lookup failed: {reason}")
+    value = completed.stdout.strip()
+    slug = github_slug(value)
+    if slug is None:
+        return OriginResolution(reason="origin is not a supported GitHub URL")
+    return OriginResolution(slug=slug)
 
 
 @contextmanager
-def materialize(target: str, online: bool) -> Iterator[tuple[Path, tuple[str, str] | None]]:
+def materialize(target: str, online: bool) -> Iterator[tuple[Path, OriginResolution]]:
     if "://" not in target and not target.startswith("git@"):
         path = Path(target).expanduser().resolve()
         yield path, origin_slug(path)
@@ -75,5 +92,4 @@ def materialize(target: str, online: bool) -> Iterator[tuple[Path, tuple[str, st
         if completed.returncode != 0:
             detail = completed.stderr.strip().splitlines()[-1] if completed.stderr.strip() else "unknown error"
             raise RepoError(f"clone failed: {detail}")
-        yield destination, slug
-
+        yield destination, OriginResolution(slug=slug)
