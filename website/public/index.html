@@ -1,0 +1,161 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Inspect the observable evidence behind a public software repository—history, tests, claims, documentation, dependencies, security and maintenance.">
+  <meta name="theme-color" content="#f6f2ea">
+  <title>Slop Meeter · Where slop meets its match</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cpath d='M8 42a24 24 0 0 1 48 0' fill='none' stroke='%23111a2a' stroke-width='7' stroke-linecap='round'/%3E%3Cpath d='M10 40a22 22 0 0 1 13-18' fill='none' stroke='%23ff625d' stroke-width='5'/%3E%3Cpath d='M23 22a22 22 0 0 1 18 0' fill='none' stroke='%23ffc94a' stroke-width='5'/%3E%3Cpath d='M41 22a22 22 0 0 1 13 18' fill='none' stroke='%2354d86b' stroke-width='5'/%3E%3Cpath d='M32 42 46 26' stroke='%23111a2a' stroke-width='5' stroke-linecap='round'/%3E%3Ccircle cx='32' cy='42' r='5' fill='%23111a2a'/%3E%3C/svg%3E">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="site-header">
+    <a class="brand" href="#top" aria-label="Slop Meeter home">
+      <img src="assets/slopmeeter-logo.png" alt="" width="54" height="54">
+      <span><strong>Slop Meeter</strong><small>Where slop meets its match.</small></span>
+    </a>
+    <nav aria-label="Primary navigation">
+      <a id="sample-report-link" href="#sample-report">Sample report</a>
+      <a href="https://github.com/rgilsimoes/slopmeeter/blob/main/docs/METHODOLOGY.md">Methodology</a>
+      <a class="github-link" href="https://github.com/rgilsimoes/slopmeeter">GitHub</a>
+    </nav>
+  </header>
+
+  <main id="top">
+    <section class="scanner-section" aria-labelledby="scanner-title">
+      <div class="scanner-copy">
+        <p class="eyebrow"><span></span> Public repository scan</p>
+        <h1 id="scanner-title">Bring the repository.<br><em>We’ll look for receipts.</em></h1>
+        <p class="lede">A deterministic evidence check for history, tests, claims, documentation, dependencies, security and maintenance. No authorship guessing. No code execution.</p>
+
+        <form id="scan-form" class="scan-form">
+          <label for="repo-url">GitHub repository</label>
+          <div class="input-row">
+            <span class="input-icon" aria-hidden="true">&lt;/&gt;</span>
+            <input id="repo-url" name="repo" type="url" value="https://github.com/example/some-tool" placeholder="https://github.com/owner/repository" required>
+            <button id="scan-button" type="submit"><span>Preview analysis</span><b aria-hidden="true">↗</b></button>
+          </div>
+          <div class="form-meta">
+            <span><i class="safety-dot"></i> Public repositories only</span>
+            <span>Preview uses representative data</span>
+          </div>
+        </form>
+
+        <div class="sample-links" aria-label="Example repositories">
+          <span>Try a sample</span>
+          <button type="button" data-repo="https://github.com/rgilsimoes/slopmeeter">Slop Meeter</button>
+          <button type="button" data-repo="https://github.com/pallets/flask">Flask</button>
+          <button type="button" data-repo="https://github.com/BurntSushi/ripgrep">ripgrep</button>
+        </div>
+      </div>
+
+      <aside class="mascot-card" aria-label="Slop Meeter mascot">
+        <img src="assets/slopmeeter-logo.png" alt="The Slop Meeter sloth mascot resting below a red-to-green quality gauge">
+        <p><strong>Calmly suspicious.</strong><br>Delightfully deterministic.</p>
+      </aside>
+    </section>
+
+    <section id="scan-progress" class="scan-progress" aria-live="polite" hidden>
+      <div class="progress-copy"><strong id="progress-title">Fetching repository metadata</strong><span id="progress-value">18%</span></div>
+      <div class="progress-track"><i id="progress-bar"></i></div>
+      <p id="progress-stage">Nothing from the target repository is being executed.</p>
+    </section>
+
+    <section id="sample-report" class="report-shell" aria-labelledby="report-title">
+      <div class="prototype-note"><span>Interactive prototype</span> Results below are representative mock data.</div>
+
+      <header class="report-header">
+        <div>
+          <p class="eyebrow">Repository analysis</p>
+          <h2 id="report-title">Repository evidence report</h2>
+          <p class="target" id="report-target"><span aria-hidden="true">&lt;/&gt;</span> github.com/example/some-tool</p>
+        </div>
+        <div class="report-badges">
+          <span class="badge online">● Online analysis</span>
+          <span class="badge safe">✓ No code executed</span>
+        </div>
+      </header>
+
+      <section class="summary-panel panel" aria-label="Report summary">
+        <div class="score-card">
+          <div class="score-ring" role="img" aria-label="Evidence score 64 out of 100">
+            <div class="score-inner"><strong>64</strong><span>Evidence score</span><small>out of 100</small></div>
+          </div>
+        </div>
+        <div class="metric"><span>Slop level</span><strong>4 <small>/ 10</small></strong><p>Lower is better</p></div>
+        <div class="metric"><span>Confidence</span><strong>91%</strong><p>Most checks available</p></div>
+        <div class="verdict">
+          <i aria-hidden="true">✓</i>
+          <div><span>Verdict</span><strong>Promising. Some receipts.</strong><p>The repository shows credible work, with a few evidence gaps to inspect.</p></div>
+        </div>
+        <div class="maturity-note"><b>⌁</b><p><span>Maturity note</span><strong>Too early to tell — 11 commits over 9 days</strong><small>A short history limits long-term signals. Reassess as the project evolves.</small></p></div>
+      </section>
+
+      <div class="report-grid">
+        <div class="report-main">
+          <section class="panel category-panel" aria-labelledby="category-title">
+            <div class="panel-heading">
+              <div><p class="eyebrow">Overview</p><h3 id="category-title">Category scores</h3></div>
+              <p>A balanced view across applicable evidence areas.</p>
+            </div>
+            <div class="category-list">
+              <div class="category-row"><span>History &amp; substance</span><strong>55</strong><progress class="warn-bar" max="100" value="55">55</progress><small>Some activity, limited history.</small></div>
+              <div class="category-row"><span>Tests &amp; CI</span><strong>90</strong><progress class="pass-bar" max="100" value="90">90</progress><small>Strong tests and CI signals.</small></div>
+              <div class="category-row"><span>Claims vs. receipts</span><strong>50</strong><progress class="warn-bar" max="100" value="50">50</progress><small>Some claims lack linked evidence.</small></div>
+              <div class="category-row"><span>Docs, release &amp; composition</span><strong>72</strong><progress class="accent-bar" max="100" value="72">72</progress><small>Useful docs; release trail is thin.</small></div>
+              <div class="category-row"><span>Dependencies &amp; security</span><strong>80</strong><progress class="pass-bar" max="100" value="80">80</progress><small>Reasonable dependency hygiene.</small></div>
+              <div class="category-row"><span>Maintenance &amp; attention</span><strong>58</strong><progress class="warn-bar" max="100" value="58">58</progress><small>Early signals; more time will help.</small></div>
+            </div>
+          </section>
+
+          <section class="panel checks-panel" aria-labelledby="checks-title">
+            <div class="panel-heading checks-heading">
+              <div><p class="eyebrow">Details</p><h3 id="checks-title">Evidence checks</h3></div>
+              <div class="filters" role="group" aria-label="Filter evidence checks">
+                <button type="button" class="active" data-filter="all">All <b>6</b></button>
+                <button type="button" data-filter="pass">Pass <b>3</b></button>
+                <button type="button" data-filter="warn">Warn <b>2</b></button>
+                <button type="button" data-filter="fail">Fail <b>1</b></button>
+              </div>
+            </div>
+            <div class="table-scroll">
+              <table>
+                <thead><tr><th>Check</th><th>Status</th><th>Finding</th><th>Evidence</th></tr></thead>
+                <tbody>
+                  <tr data-status="warn"><td><code>H2</code> Largest-commit share</td><td><span class="status warn">▲ Warn</span></td><td>Largest commit holds 58% of added lines.</td><td><a href="#">commit a1b2c3</a></td></tr>
+                  <tr data-status="pass"><td><code>T2</code> Tests assert</td><td><span class="status pass">✓ Pass</span></td><td>9 of 10 test functions contain meaningful assertions.</td><td><a href="#">tests/ (9/10)</a></td></tr>
+                  <tr data-status="warn"><td><code>C1</code> Claims have receipts</td><td><span class="status warn">▲ Warn</span></td><td>2 of 4 key claims link to evidence.</td><td><a href="#">README.md:42</a></td></tr>
+                  <tr data-status="pass"><td><code>D1</code> README essentials</td><td><span class="status pass">✓ Pass</span></td><td>Description, installation and usage are present.</td><td><a href="#">README.md</a></td></tr>
+                  <tr data-status="fail"><td><code>D3</code> Release hygiene</td><td><span class="status fail">× Fail</span></td><td>No tag or changelog was found.</td><td><span>—</span></td></tr>
+                  <tr data-status="pass"><td><code>S4</code> Secret patterns</td><td><span class="status pass">✓ Pass</span></td><td>No high-confidence credential patterns found.</td><td><span>28 files checked</span></td></tr>
+                </tbody>
+              </table>
+              <p id="empty-filter" class="empty-filter" hidden>No checks match this filter.</p>
+            </div>
+          </section>
+        </div>
+
+        <aside class="panel inspect-panel" aria-labelledby="inspect-title">
+          <p class="eyebrow">Priorities</p>
+          <h3 id="inspect-title">What to inspect next</h3>
+          <p class="inspect-intro">Three high-leverage places to build confidence.</p>
+          <ol>
+            <li><span>1</span><div><strong>Review the largest commit</strong><p>A single commit holds 58% of added lines. Check what changed and why.</p></div></li>
+            <li><span>2</span><div><strong>Verify claims without receipts</strong><p>Two key claims need a benchmark, source or supporting material.</p></div></li>
+            <li><span>3</span><div><strong>Look for a release trail</strong><p>No tag or changelog was found. Confirm how versions are delivered.</p></div></li>
+          </ol>
+          <a class="method-link" href="https://github.com/rgilsimoes/slopmeeter/blob/main/docs/METHODOLOGY.md">Read the methodology <span>↗</span></a>
+        </aside>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <p><strong>Slop Meeter</strong> · A score is a prompt for scrutiny, not a verdict on the authors.</p>
+    <p><a href="https://github.com/rgilsimoes/slopmeeter">CLI on GitHub</a><span>•</span><a href="https://slopcop.me/">Need a code-facing check? Try SlopCop.</a></p>
+  </footer>
+
+  <script src="app.js" defer></script>
+</body>
+</html>

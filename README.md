@@ -4,6 +4,8 @@
   <img src="docs/slopmeeter-logo.png" alt="Slop Meeter logo" width="420">
 </p>
 
+<p align="center"><em>Where slop meets its match.</em></p>
+
 <p align="center">
   <a href="LICENSE"><picture><source media="(prefers-color-scheme: dark)" srcset="https://shieldcn.dev/github/license/rgilsimoes/slopmeeter.svg?variant=outline&amp;mode=dark"><img alt="MIT license" src="https://shieldcn.dev/github/license/rgilsimoes/slopmeeter.svg?variant=outline&amp;mode=light"></picture></a>
   <a href="https://github.com/rgilsimoes/slopmeeter/actions/workflows/ci.yml"><picture><source media="(prefers-color-scheme: dark)" srcset="https://shieldcn.dev/github/ci/rgilsimoes/slopmeeter.svg?workflow=ci.yml&amp;branch=main&amp;variant=outline&amp;mode=dark"><img alt="CI status" src="https://shieldcn.dev/github/ci/rgilsimoes/slopmeeter.svg?workflow=ci.yml&amp;branch=main&amp;variant=outline&amp;mode=light"></picture></a>
@@ -119,7 +121,7 @@ complete successfully. Without it, reports continue to be written to stdout.
 ███████║███████╗╚██████╔╝██║         ██║ ╚═╝ ██║███████╗███████╗   ██║   ███████╗██║  ██║
 ╚══════╝╚══════╝ ╚═════╝ ╚═╝         ╚═╝     ╚═╝╚══════╝╚══════╝   ╚═╝   ╚══════╝╚═╝  ╚═╝
 score the evidence, not the vibes
-v0.2.0 · target ./some-tool
+v0.3.0 · target ./some-tool
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────────
 64 / 100                   │ Slop level  4 / 10           │ Promising. Some receipts.

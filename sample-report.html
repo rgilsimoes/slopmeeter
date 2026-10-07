@@ -1,0 +1,379 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'; img-src data:; font-src 'none'; script-src 'none'; connect-src 'none'; frame-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'">
+  <title>Slop Meeter report · https://github.com/pingdotgg/t3code</title>
+  <style>
+:root {
+  color-scheme: light;
+  --paper: #f4f1e9;
+  --surface: #fffefb;
+  --ink: #122033;
+  --muted: #647083;
+  --line: #dddcd5;
+  --navy: #11243f;
+  --blue: #117aaa;
+  --teal: #148a83;
+  --pass: #14775c;
+  --pass-soft: #e6f4ee;
+  --warn: #a56600;
+  --warn-soft: #fff1cd;
+  --fail: #b5413b;
+  --fail-soft: #fde9e7;
+  --na: #687383;
+  --na-soft: #edf0f3;
+  --shadow: 0 18px 55px rgba(18, 32, 51, 0.08);
+}
+
+* { box-sizing: border-box; }
+
+html { background: var(--paper); }
+
+body {
+  margin: 0;
+  color: var(--ink);
+  background:
+    radial-gradient(circle at 15% 0%, rgba(17, 122, 170, 0.08), transparent 28rem),
+    var(--paper);
+  font: 15px/1.5 -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+.page-shell {
+  width: min(1480px, calc(100% - 40px));
+  margin: 20px auto;
+  overflow: hidden;
+  background: rgba(255, 254, 251, 0.94);
+  border: 1px solid rgba(116, 119, 116, 0.25);
+  border-radius: 18px;
+  box-shadow: var(--shadow);
+}
+
+.site-header {
+  min-height: 68px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  padding: 0 38px;
+  border-bottom: 1px solid var(--line);
+  background: rgba(255, 255, 255, 0.72);
+}
+
+.brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 13px;
+  color: var(--navy);
+  font-size: 19px;
+  font-weight: 850;
+  letter-spacing: 0.08em;
+  text-decoration: none;
+}
+
+.brand-mark {
+  width: 26px;
+  height: 26px;
+  display: flex;
+  align-items: end;
+  gap: 3px;
+}
+
+.brand-mark i { width: 6px; background: var(--blue); border-radius: 1px 1px 0 0; }
+.brand-mark i:nth-child(1) { height: 10px; opacity: 0.65; }
+.brand-mark i:nth-child(2) { height: 18px; opacity: 0.82; }
+.brand-mark i:nth-child(3) { height: 25px; }
+
+.header-meta { display: flex; align-items: center; gap: 10px; color: var(--muted); font-size: 13px; }
+.dot { color: #a7aeb7; }
+
+main { padding: 38px; }
+
+.report-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: end;
+  gap: 28px;
+  margin-bottom: 26px;
+}
+
+.eyebrow, .label, .metric span {
+  margin: 0 0 4px;
+  color: var(--muted);
+  font: 700 11px/1.2 ui-monospace, SFMono-Regular, Menlo, monospace;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+h1, h2, p { margin-top: 0; }
+
+h1 {
+  margin-bottom: 2px;
+  color: #111a2a;
+  font: 750 clamp(34px, 4vw, 54px)/1.04 Georgia, "Times New Roman", serif;
+  letter-spacing: -0.035em;
+}
+
+h2 { margin-bottom: 0; color: var(--navy); font: 750 25px/1.15 Georgia, "Times New Roman", serif; }
+
+.target {
+  margin: 8px 0 0;
+  color: #075ac3;
+  font: 650 17px/1.4 ui-monospace, SFMono-Regular, Menlo, monospace;
+  overflow-wrap: anywhere;
+}
+
+.target span { margin-right: 7px; }
+
+.mode-badges { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 10px; }
+
+.badge, .status-pill, .count-pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.badge { padding: 8px 12px; font-size: 12px; }
+.badge-mode { color: #07558d; background: #e2f3fc; }
+.badge-local { color: #12674f; background: var(--pass-soft); }
+
+.panel { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; }
+
+.summary {
+  display: grid;
+  grid-template-columns: 245px 340px 1fr;
+  gap: 0;
+  align-items: center;
+  min-height: 230px;
+  margin-bottom: 22px;
+  padding: 26px 30px;
+}
+
+.score-card { display: flex; align-items: center; justify-content: center; border-right: 1px solid var(--line); }
+.score-ring { position: relative; width: 170px; height: 170px; }
+.score-ring svg { width: 100%; height: 100%; transform: rotate(-90deg); }
+.score-track, .score-value { fill: none; stroke-width: 9; }
+.score-track { stroke: #e7e9e8; }
+.score-value { stroke: var(--teal); stroke-linecap: round; }
+.score-copy { position: absolute; inset: 0; display: grid; place-content: center; text-align: center; }
+.score-copy strong { font: 800 48px/1 ui-monospace, SFMono-Regular, Menlo, monospace; }
+.score-copy span { margin-top: 7px; color: var(--muted); font-size: 12px; }
+
+.summary-metrics { display: grid; grid-template-columns: 1fr 1fr; padding: 0 34px; }
+.metric { min-width: 0; padding-right: 24px; }
+.metric + .metric { padding-left: 24px; border-left: 1px solid var(--line); }
+.metric strong { display: block; margin: 7px 0 3px; font: 800 35px/1.1 ui-monospace, SFMono-Regular, Menlo, monospace; }
+.metric small { color: var(--muted); }
+
+.verdict { display: flex; gap: 14px; align-items: flex-start; padding-left: 30px; border-left: 1px solid var(--line); }
+.verdict-icon { width: 38px; height: 38px; display: grid; flex: 0 0 auto; place-content: center; border-radius: 50%; color: var(--pass); background: var(--pass-soft); font-weight: 900; }
+.verdict h2 { margin-top: 5px; color: var(--pass); font-size: 27px; }
+.verdict p { margin: 8px 0 0; color: var(--muted); }
+
+.maturity { grid-column: 2 / -1; margin: 20px 0 0; padding: 14px 18px; border-left: 3px solid var(--warn); background: #fffaf0; border-radius: 0 8px 8px 0; }
+.maturity strong { display: block; color: #553c14; font-family: Georgia, "Times New Roman", serif; font-size: 18px; }
+.maturity span { color: var(--muted); font-size: 13px; }
+
+.report-grid { display: grid; grid-template-columns: minmax(0, 1fr) 360px; gap: 22px; align-items: start; }
+.main-column { display: grid; gap: 22px; min-width: 0; }
+.section-panel { overflow: hidden; }
+
+.section-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  padding: 20px 22px;
+  border-bottom: 1px solid var(--line);
+}
+
+.section-heading > p { max-width: 420px; margin: 0; color: var(--muted); font-size: 13px; }
+
+.category-row {
+  display: grid;
+  grid-template-columns: minmax(190px, 1fr) 52px minmax(180px, 1.5fr);
+  gap: 18px;
+  align-items: center;
+  min-height: 53px;
+  padding: 9px 22px;
+  border-bottom: 1px solid #ebeae5;
+}
+
+.category-row:last-child { border-bottom: 0; }
+.category-name { font-weight: 700; }
+.category-score { font: 800 16px/1 ui-monospace, SFMono-Regular, Menlo, monospace; }
+
+progress { width: 100%; height: 10px; overflow: hidden; border: 0; border-radius: 999px; background: #e7eaeb; }
+progress::-webkit-progress-bar { background: #e7eaeb; border-radius: 999px; }
+progress::-webkit-progress-value { background: var(--bar-color, var(--teal)); border-radius: 999px; }
+progress::-moz-progress-bar { background: var(--bar-color, var(--teal)); border-radius: 999px; }
+.score-pass { --bar-color: var(--pass); }
+.score-accent { --bar-color: var(--blue); }
+.score-warn { --bar-color: #dda51d; }
+.score-fail { --bar-color: var(--fail); }
+
+.inspect-panel { position: sticky; top: 20px; padding: 22px; }
+.inspect-panel h2 { margin-top: 3px; }
+.inspect-intro { margin: 7px 0 18px; color: var(--muted); font-size: 13px; }
+.inspection-list { display: grid; gap: 10px; margin: 0; padding: 0; list-style: none; counter-reset: inspection; }
+.inspection-list li { position: relative; padding: 15px 14px 15px 50px; border: 1px solid var(--line); border-radius: 10px; counter-increment: inspection; }
+.inspection-list li::before { content: counter(inspection); position: absolute; left: 14px; top: 14px; width: 26px; height: 26px; display: grid; place-content: center; border-radius: 50%; color: var(--navy); background: #e5edf3; font-weight: 800; }
+.inspection-list h3 { margin: 0 0 4px; color: var(--navy); font-size: 14px; }
+.inspection-list p { margin: 0; color: var(--muted); font-size: 12px; }
+.inspection-list .why { margin-top: 4px; color: #49576a; }
+.positive-state { margin: 0; padding: 18px; color: var(--pass); background: var(--pass-soft); border-radius: 10px; font-weight: 700; }
+
+.status-counts { display: flex; flex-wrap: wrap; justify-content: end; gap: 6px; }
+.count-pill { gap: 5px; padding: 5px 9px; color: var(--muted); background: #f0f2f3; font-size: 11px; }
+.count-pill strong { color: var(--ink); }
+
+.table-scroll { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; font-size: 12px; }
+th { color: var(--muted); background: #fafaf7; font-size: 11px; text-align: left; }
+th, td { padding: 11px 13px; border-bottom: 1px solid #e7e6e1; vertical-align: top; }
+tbody tr:last-child td { border-bottom: 0; }
+.check-name { min-width: 170px; }
+.check-id { display: inline-block; min-width: 30px; margin-right: 7px; padding: 3px 5px; border-radius: 5px; color: var(--navy); background: #edf1f4; font: 750 11px/1 ui-monospace, SFMono-Regular, Menlo, monospace; text-align: center; }
+.status-pill { min-width: 68px; gap: 5px; padding: 4px 8px; font-size: 10px; letter-spacing: 0.03em; }
+.status-pass { color: var(--pass); background: var(--pass-soft); }
+.status-warn { color: var(--warn); background: var(--warn-soft); }
+.status-fail { color: var(--fail); background: var(--fail-soft); }
+.status-na { color: var(--na); background: var(--na-soft); }
+.evidence-list { min-width: 160px; margin: 0; padding-left: 17px; color: #315573; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
+.empty-evidence { color: var(--muted); }
+
+.information { padding-bottom: 8px; }
+.information-list { display: grid; gap: 10px; margin: 0; padding: 18px 22px; list-style: none; }
+.information-list li { padding: 12px 14px; border-left: 3px solid var(--blue); background: #f2f8fb; }
+.information-list strong { display: block; margin-bottom: 3px; }
+.information-list span { color: var(--muted); }
+
+footer { display: flex; justify-content: space-between; gap: 24px; margin-top: 4px; padding: 22px 38px; color: var(--muted); border-top: 1px solid var(--line); font-size: 11px; }
+footer p { margin: 0; }
+
+.visually-hidden { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
+
+@media (max-width: 1100px) {
+  .summary { grid-template-columns: 210px 1fr; }
+  .verdict { border-left: 0; border-top: 1px solid var(--line); padding: 24px 0 0 30px; }
+  .maturity { grid-column: 1 / -1; }
+}
+
+@media (max-width: 920px) {
+  .report-grid { grid-template-columns: 1fr; }
+  .inspect-panel { position: static; grid-row: 1; }
+}
+
+@media (max-width: 720px) {
+  .page-shell { width: 100%; margin: 0; border: 0; border-radius: 0; }
+  .site-header, main, footer { padding-left: 20px; padding-right: 20px; }
+  .header-meta { display: none; }
+  .report-header { display: block; }
+  .mode-badges { justify-content: flex-start; margin-top: 18px; }
+  .summary { grid-template-columns: 1fr; padding: 22px; }
+  .score-card { border-right: 0; border-bottom: 1px solid var(--line); padding-bottom: 22px; }
+  .summary-metrics { padding: 24px 0; }
+  .verdict { padding-left: 0; }
+  .maturity { grid-column: 1; }
+  .section-heading { align-items: flex-start; flex-direction: column; }
+  .status-counts { justify-content: start; }
+  .category-row { grid-template-columns: 1fr 45px; }
+  .category-row progress { grid-column: 1 / -1; }
+  footer { flex-direction: column; }
+}
+
+@media print {
+  :root { --paper: white; --surface: white; --shadow: none; }
+  body { background: white; font-size: 11pt; }
+  .page-shell { width: 100%; margin: 0; border: 0; border-radius: 0; box-shadow: none; }
+  .site-header, main, footer { padding-left: 0; padding-right: 0; }
+  .report-grid { display: block; }
+  .inspect-panel { position: static; margin: 18px 0; }
+  .panel, tr, .inspection-list li { break-inside: avoid; }
+  .status-pill { border: 1px solid currentColor; }
+}
+  </style>
+</head>
+<body>
+  <div class="page-shell">
+    <header class="site-header">
+      <div class="brand" aria-label="Slop Meeter report">
+        <span class="brand-mark" aria-hidden="true"><i></i><i></i><i></i></span>
+        <span>SLOP MEETER</span>
+      </div>
+      <div class="header-meta"><span>v0.3.0</span><span class="dot">•</span><span>Report generated locally</span></div>
+    </header>
+
+    <main>
+      <header class="report-header">
+        <div>
+          <p class="eyebrow">Repository analysis</p>
+          <h1>Repository evidence report</h1>
+          <p class="target"><span aria-hidden="true">&lt;/&gt;</span> https://github.com/pingdotgg/t3code</p>
+        </div>
+        <div class="mode-badges">
+          <span class="badge badge-mode">● Online analysis</span>
+          <span class="badge badge-local">✓ Generated locally</span>
+        </div>
+      </header>
+
+      <section class="summary panel" aria-labelledby="summary-heading">
+        <h2 id="summary-heading" class="visually-hidden">Report summary</h2>
+        <div class="score-card"><div class="score-ring" role="img" aria-label="Evidence score 80 out of 100"><svg viewBox="0 0 120 120" aria-hidden="true"><circle class="score-track" cx="60" cy="60" r="50"></circle><circle class="score-value" cx="60" cy="60" r="50" pathLength="100" stroke-dasharray="79.86 100"></circle></svg><div class="score-copy"><strong>80</strong><span>Evidence score<br>out of 100</span></div></div></div>
+        <div class="summary-metrics">
+          <div class="metric"><span>Slop level</span><strong>2 / 10</strong><small>Lower is better</small></div>
+          <div class="metric"><span>Confidence</span><strong>88%</strong><small>Based on available evidence</small></div>
+        </div>
+        <div class="verdict">
+          <span class="verdict-icon" aria-hidden="true">✓</span>
+          <div><span class="label">Verdict</span><h2>Promising. Some receipts.</h2><p>The score reflects observable repository evidence.</p></div>
+        </div>
+
+      </section>
+
+      <div class="report-grid">
+        <div class="main-column">
+          <section class="panel section-panel" aria-labelledby="categories-heading">
+            <div class="section-heading">
+              <div><p class="eyebrow">Overview</p><h2 id="categories-heading">Category scores</h2></div>
+              <p>A balanced view across the applicable evidence areas.</p>
+            </div>
+            <div class="categories"><div class="category-row"><span class="category-name">History &amp; substance</span><strong class="category-score">100</strong><progress class="score-pass" max="100" value="100.00" aria-label="History &amp; substance score 100 out of 100">100</progress></div><div class="category-row"><span class="category-name">Tests &amp; CI</span><strong class="category-score">100</strong><progress class="score-pass" max="100" value="100.00" aria-label="Tests &amp; CI score 100 out of 100">100</progress></div><div class="category-row"><span class="category-name">Claims vs. receipts</span><strong class="category-score">100</strong><progress class="score-pass" max="100" value="100.00" aria-label="Claims vs. receipts score 100 out of 100">100</progress></div><div class="category-row"><span class="category-name">Docs, release &amp; composition</span><strong class="category-score">88</strong><progress class="score-pass" max="100" value="87.50" aria-label="Docs, release &amp; composition score 88 out of 100">88</progress></div><div class="category-row"><span class="category-name">Dependencies &amp; security</span><strong class="category-score">11</strong><progress class="score-fail" max="100" value="11.11" aria-label="Dependencies &amp; security score 11 out of 100">11</progress></div><div class="category-row"><span class="category-name">Maintenance &amp; attention</span><strong class="category-score">33</strong><progress class="score-fail" max="100" value="33.33" aria-label="Maintenance &amp; attention score 33 out of 100">33</progress></div></div>
+          </section>
+
+          <section class="panel section-panel checks-panel" aria-labelledby="checks-heading">
+            <div class="section-heading checks-heading">
+              <div><p class="eyebrow">Details</p><h2 id="checks-heading">Evidence checks</h2></div>
+              <div class="status-counts" aria-label="Check status counts"><span class="count-pill status-pass">Pass <strong>16</strong></span><span class="count-pill status-warn">Warn <strong>0</strong></span><span class="count-pill status-fail">Fail <strong>5</strong></span><span class="count-pill status-na">N/A <strong>2</strong></span></div>
+            </div>
+            <div class="table-scroll">
+              <table>
+                <thead><tr><th scope="col">Check</th><th scope="col">Status</th><th scope="col">Finding</th><th scope="col">Evidence</th></tr></thead>
+                <tbody><tr><td class="check-name"><span class="check-id">H1</span>Commit depth</td><td><span class="status-pill status-pass"><span aria-hidden="true">✓</span> PASS</span></td><td>4939 commits inspected</td><td><ul class="evidence-list"><li>commit count: 4939</li></ul></td></tr><tr><td class="check-name"><span class="check-id">H2</span>Largest-commit share</td><td><span class="status-pill status-pass"><span aria-hidden="true">✓</span> PASS</span></td><td>largest commit holds 19% of added lines</td><td><ul class="evidence-list"><li>6f9cea00ae96: 1282991 of 6841315 added lines</li></ul></td></tr><tr><td class="check-name"><span class="check-id">H3</span>Time spread</td><td><span class="status-pill status-pass"><span aria-hidden="true">✓</span> PASS</span></td><td>217 active days across a 243-day span</td><td><ul class="evidence-list"><li>first: 2026-02-07</li><li>last: 2026-10-07</li></ul></td></tr><tr><td class="check-name"><span class="check-id">H4</span>Commit messages</td><td><span class="status-pill status-pass"><span aria-hidden="true">✓</span> PASS</span></td><td>130 of 4939 messages are generic</td><td><ul class="evidence-list"><li>43e8bbd7aea2: fix</li><li>d6eb386e3d3a: planning</li><li>8ab58a0b266d: tip</li><li>6f42bd9c88d7: cleanup</li><li>5b26bd408ba8: link</li><li>b5a62504d4f1: move</li><li>9309edf4f42c: rm test</li><li>2fc0b01c18ab: fmt</li><li>3503dbc7d5b2: pin  vite</li><li>074d3af79c3a: cleanup</li></ul></td></tr><tr><td class="check-name"><span class="check-id">H5</span>Contributors</td><td><span class="status-pill status-pass"><span aria-hidden="true">✓</span> PASS</span></td><td>426 non-bot contributor identities</td><td><ul class="evidence-list"><li>100130505+jakaskerjanc@users.noreply.github.com</li><li>100132710+zeus-deus@users.noreply.github.com</li><li>101453576+aditya190803@users.noreply.github.com</li><li>102943475+aoright@users.noreply.github.com</li><li>103925638+aaditagrawal@users.noreply.github.com</li><li>103979764+elsargo@users.noreply.github.com</li><li>10465470+theicaruswings@users.noreply.github.com</li><li>104939854+ruzbyte@users.noreply.github.com</li><li>1054346243@qq.com</li><li>105842516+jamesx0416@users.noreply.github.com</li></ul></td></tr><tr><td class="check-name"><span class="check-id">T1</span>Tests present</td><td><span class="status-pill status-pass"><span aria-hidden="true">✓</span> PASS</span></td><td>747614 test LOC / 1511039 source LOC (49%)</td><td><ul class="evidence-list"><li>.repos/alchemy-effect/benchmark/container/test/bench.test.ts</li><li>.repos/alchemy-effect/examples/aws-aurora-drizzle/test/integ.test.ts</li><li>.repos/alchemy-effect/examples/aws-bedrock-ai/test/integ.test.ts</li><li>.repos/alchemy-effect/examples/aws-dev/test/dev.test.ts</li><li>.repos/alchemy-effect/examples/aws-dev/test/integ.test.ts</li><li>.repos/alchemy-effect/examples/aws-dsql-drizzle/test/integ.test.ts</li><li>.repos/alchemy-effect/examples/aws-ecs/test/dev.test.ts</li><li>.repos/alchemy-effect/examples/aws-ecs/test/integ.test.ts</li><li>.repos/alchemy-effect/examples/aws-lambda/test/dev.test.ts</li><li>.repos/alchemy-effect/examples/aws-lambda/test/integ.test.ts</li><li>.repos/alchemy-effect/examples/aws-website-astro/test/dev.test.ts</li><li>.repos/alchemy-effect/examples/aws-website-astro/test/integ.test.ts</li><li>.repos/alchemy-effect/examples/aws-website-foldkit/test/integ.test.ts</li><li>.repos/alchemy-effect/examples/aws-website-nextjs/test/dev.test.ts</li><li>.repos/alchemy-effect/examples/aws-website-nextjs/test/integ.test.ts</li><li>.repos/alchemy-effect/examples/aws-website-nuxt/test/dev.test.ts</li><li>.repos/alchemy-effect/examples/aws-website-nuxt/test/integ.test.ts</li><li>.repos/alchemy-effect/examples/aws-website-react-router/test/integ.test.ts</li><li>.repos/alchemy-effect/examples/aws-website-solidstart/test/integ.test.ts</li><li>.repos/alchemy-effect/examples/aws-website-sveltekit/test/dev.test.ts</li></ul></td></tr><tr><td class="check-name"><span class="check-id">T2</span>Tests assert</td><td><span class="status-pill status-pass"><span aria-hidden="true">✓</span> PASS</span></td><td>3372 of 3544 test functions contain meaningful assertions</td><td><ul class="evidence-list"><li>.repos/alchemy-effect/benchmark/container/test/bench.test.ts: test at offset 9843</li><li>.repos/alchemy-effect/examples/aws-website-solidstart/test/integ.test.ts: test at offset 2899</li><li>.repos/alchemy-effect/examples/cloudflare-dev/test/integ.test.ts: test at offset 32943</li><li>.repos/alchemy-effect/examples/cloudflare-website-solidstart/test/integ.test.ts: test at offset 2773</li><li>.repos/alchemy-effect/examples/dev-stress/test/dev-stress.test.ts: test at offset 320</li><li>.repos/alchemy-effect/examples/dev-stress/test/dev-stress.test.ts: test at offset 20402</li><li>.repos/alchemy-effect/examples/dev-stress/test/dev-stress.test.ts: test at offset 22959</li><li>.repos/alchemy-effect/examples/dev-stress/test/dev-stress.test.ts: test at offset 30316</li><li>.repos/alchemy-effect/examples/dev-stress/test/dev-stress.test.ts: test at offset 36038</li><li>.repos/alchemy-effect/examples/dev-stress/test/dev-stress.test.ts: test at offset 41535</li><li>.repos/alchemy-effect/examples/dev-stress/test/dev-stress.test.ts: test at offset 42575</li><li>.repos/alchemy-effect/examples/dev-stress/test/dev-stress.test.ts: test at offset 42959</li><li>.repos/alchemy-effect/examples/dev-stress/test/dev-stress.test.ts: test at offset 43701</li><li>.repos/alchemy-effect/examples/dev-stress/test/dev-stress.test.ts: test at offset 53209</li><li>.repos/alchemy-effect/examples/dev-stress/test/harness.ts: test at offset 12231</li><li>.repos/alchemy-effect/examples/fly-website-solidstart/test/integ.test.ts: test at offset 2945</li><li>.repos/alchemy-effect/examples/hetzner-website-solidstart/test/integ.test.ts: test at offset 3179</li><li>.repos/alchemy-effect/examples/neon/test/policy.test.ts: test at offset 4170</li><li>.repos/alchemy-effect/examples/railway-website-solidstart/test/integ.test.ts: test at offset 2982</li><li>.repos/alchemy-effect/packages/alchemy/src/Test/Alchemy.ts: test at offset 9896</li></ul></td></tr><tr><td class="check-name"><span class="check-id">T3</span>CI runs tests</td><td><span class="status-pill status-pass"><span aria-hidden="true">✓</span> PASS</span></td><td>CI configuration runs tests</td><td><ul class="evidence-list"><li>.github/workflows/ci.yml</li></ul></td></tr><tr><td class="check-name"><span class="check-id">C1</span>Claims have receipts</td><td><span class="status-pill status-pass"><span aria-hidden="true">✓</span> PASS</span></td><td>no quantitative or superlative claims found</td><td><span class="empty-evidence">—</span></td></tr><tr><td class="check-name"><span class="check-id">C2</span>Eval harness present</td><td><span class="status-pill status-na"><span aria-hidden="true">–</span> N/A</span></td><td>no claims require an evaluation harness</td><td><span class="empty-evidence">—</span></td></tr><tr><td class="check-name"><span class="check-id">C3</span>Hype density</td><td><span class="status-pill status-pass"><span aria-hidden="true">✓</span> PASS</span></td><td>0 buzzwords in 676 README words (0.0 per 1,000)</td><td><span class="empty-evidence">—</span></td></tr><tr><td class="check-name"><span class="check-id">D1</span>README essentials</td><td><span class="status-pill status-pass"><span aria-hidden="true">✓</span> PASS</span></td><td>README contains 3 of 3 essentials</td><td><span class="empty-evidence">—</span></td></tr><tr><td class="check-name"><span class="check-id">D2</span>License</td><td><span class="status-pill status-pass"><span aria-hidden="true">✓</span> PASS</span></td><td>recognized mit license</td><td><ul class="evidence-list"><li>LICENSE</li></ul></td></tr><tr><td class="check-name"><span class="check-id">D3</span>Release hygiene</td><td><span class="status-pill status-pass"><span aria-hidden="true">✓</span> PASS</span></td><td>615 release tags found</td><td><ul class="evidence-list"><li>desktop-preview</li><li>nightly-v0.0.17-nightly.20260415.44</li><li>nightly-v0.0.17-nightly.20260415.45</li><li>nightly-v0.0.18-nightly.20260416.46</li><li>nightly-v0.0.21-nightly.20260417.55</li><li>nightly-v0.0.21-nightly.20260417.58</li><li>v0.0.0-alpha.1</li><li>v0.0.0-alpha.10</li><li>v0.0.0-alpha.11</li><li>v0.0.0-alpha.12</li></ul></td></tr><tr><td class="check-name"><span class="check-id">D4</span>Substance vs. fluff</td><td><span class="status-pill status-pass"><span aria-hidden="true">✓</span> PASS</span></td><td>code is 86% of 96082662 tracked bytes</td><td><ul class="evidence-list"><li>code bytes: 82289431</li><li>eligible bytes: 96082662</li></ul></td></tr><tr><td class="check-name"><span class="check-id">D5</span>Placeholder density</td><td><span class="status-pill status-fail"><span aria-hidden="true">×</span> FAIL</span></td><td>1 empty functions and 334 placeholder markers</td><td><ul class="evidence-list"><li>density: 93.6%</li></ul></td></tr><tr><td class="check-name"><span class="check-id">S1</span>Lockfile / pinning</td><td><span class="status-pill status-pass"><span aria-hidden="true">✓</span> PASS</span></td><td>dependency lockfile found</td><td><ul class="evidence-list"><li>pnpm-lock.yaml</li><li>.repos/alchemy-effect/packages/alchemy/test/AWS/Lambda/fixtures/lockfile-pinning/npm/package-lock.json</li><li>.repos/alchemy-effect/packages/alchemy/test/AWS/Lambda/fixtures/lockfile-pinning/pnpm/pnpm-lock.yaml</li><li>.repos/alchemy-effect/packages/alchemy/test/AWS/Lambda/fixtures/lockfile-pinning/yarn/yarn.lock</li><li>.repos/effect-smol/pnpm-lock.yaml</li></ul></td></tr><tr><td class="check-name"><span class="check-id">S2</span>Dependencies exist</td><td><span class="status-pill status-fail"><span aria-hidden="true">×</span> FAIL</span></td><td>2 declared dependencies were not found</td><td><ul class="evidence-list"><li>npm:@alchemy.run/cloudflare-test-tools</li><li>npm:@alchemy.run/vite-plugin-copy-editor</li></ul></td></tr><tr><td class="check-name"><span class="check-id">S3</span>Install-time risk</td><td><span class="status-pill status-fail"><span aria-hidden="true">×</span> FAIL</span></td><td>install-time execution pattern found</td><td><ul class="evidence-list"><li>README.md:28: shell-pipe install command</li><li>README.md:114: shell-pipe install command</li></ul></td></tr><tr><td class="check-name"><span class="check-id">S4</span>Secrets patterns</td><td><span class="status-pill status-fail"><span aria-hidden="true">×</span> FAIL</span></td><td>36 high-confidence secret patterns found</td><td><ul class="evidence-list"><li>.repos/alchemy-effect/packages/alchemy/src/AWS/IAM/ServerCertificate.ts:85: private key pattern</li><li>.repos/alchemy-effect/packages/alchemy/src/Hetzner/Server.ts:627: private key pattern</li><li>.repos/alchemy-effect/packages/alchemy/test/KeyPair.test.ts:20: private key pattern</li><li>.repos/alchemy-effect/packages/alchemy/test/AWS/ACM/fixtures/import-cert.ts:29: private key pattern</li><li>.repos/alchemy-effect/packages/alchemy/test/AWS/EC2/fixtures/client-vpn-certificate.ts:27: private key pattern</li><li>.repos/alchemy-effect/packages/alchemy/test/AWS/ECS/ServiceDomain.test.ts:45: private key pattern</li><li>.repos/alchemy-effect/packages/alchemy/test/AWS/ELBv2/fixtures/certs.ts:35: private key pattern</li><li>.repos/alchemy-effect/packages/alchemy/test/AWS/ELBv2/fixtures/certs.ts:89: private key pattern</li><li>.repos/alchemy-effect/packages/alchemy/test/AWS/ELBv2/fixtures/certs.ts:143: private key pattern</li><li>.repos/alchemy-effect/packages/alchemy/test/AWS/IAM/fixtures.ts:19: private key pattern</li><li>.repos/alchemy-effect/packages/alchemy/test/AWS/S3/Bucket.test.ts:1930: AWS access key pattern</li><li>.repos/alchemy-effect/packages/alchemy/test/Cloudflare/CustomCertificate/fixtures/key1.pem:1: private key pattern</li><li>.repos/alchemy-effect/packages/alchemy/test/Cloudflare/CustomCertificate/fixtures/key2.pem:1: private key pattern</li><li>.repos/alchemy-effect/packages/alchemy/test/Cloudflare/MtlsCertificate/fixtures/certs.ts:86: private key pattern</li><li>.repos/alchemy-effect/packages/alchemy/test/Cloudflare/OriginTlsClientAuth/fixtures/certs.ts:37: private key pattern</li><li>.repos/alchemy-effect/packages/alchemy/test/Cloudflare/OriginTlsClientAuth/fixtures/certs.ts:90: private key pattern</li><li>.repos/alchemy-effect/packages/alchemy/test/Cloudflare/OriginTlsClientAuth/fixtures/certs.ts:143: private key pattern</li><li>.repos/alchemy-effect/packages/alchemy/test/Cloudflare/OriginTlsClientAuth/fixtures/certs.ts:196: private key pattern</li><li>.repos/alchemy-effect/packages/alchemy/test/Cloudflare/OriginTlsClientAuth/fixtures/certs.ts:249: private key pattern</li><li>.repos/alchemy-effect/packages/alchemy/test/Cloudflare/OriginTlsClientAuth/fixtures/certs.ts:302: private key pattern</li><li>.repos/alchemy-effect/packages/alchemy/test/Cloudflare/OriginTlsClientAuth/fixtures/certs.ts:362: private key pattern</li><li>.repos/alchemy-effect/packages/alchemy/test/Cloudflare/OriginTlsClientAuth/fixtures/certs.ts:415: private key pattern</li><li>.repos/alchemy-effect/packages/alchemy/test/Cloudflare/OriginTlsClientAuth/fixtures/certs.ts:468: private key pattern</li><li>.repos/alchemy-effect/packages/alchemy/test/Cloudflare/R2/BucketSippy.test.ts:114: AWS access key pattern</li><li>.repos/alchemy-effect/packages/alchemy/test/Fly/Certificate.test.ts:53: private key pattern</li><li>.repos/alchemy-effect/packages/alchemy/test/Fly/Certificate.test.ts:105: private key pattern</li><li>.repos/alchemy-effect/packages/alchemy/test/Fly/Certificate.test.ts:157: private key pattern</li><li>.repos/alchemy-effect/packages/alchemy/test/GCP/AppEngine/fixtures/cert.ts:29: private key pattern</li><li>.repos/alchemy-effect/packages/alchemy/test/GCP/AppEngine/fixtures/cert.ts:77: private key pattern</li><li>.repos/alchemy-effect/packages/alchemy/test/GCP/CertificateManager/Certificate.test.ts:38: private key pattern</li><li>.repos/alchemy-effect/packages/alchemy/test/GCP/CertificateManager/Certificate.test.ts:88: private key pattern</li><li>.repos/alchemy-effect/packages/alchemy/test/GCP/CertificateManager/CertificateMapEntry.test.ts:38: private key pattern</li><li>.repos/alchemy-effect/packages/alchemy/test/GCP/Compute/fixtures/https-proxy-cert.ts:59: private key pattern</li><li>.repos/alchemy-effect/packages/alchemy/test/GCP/Compute/fixtures/https-proxy-cert.ts:130: private key pattern</li><li>.repos/alchemy-effect/packages/alchemy/test/Hetzner/Certificate.test.ts:56: private key pattern</li><li>.repos/alchemy-effect/packages/alchemy/test/Hetzner/Certificate.test.ts:107: private key pattern</li></ul></td></tr><tr><td class="check-name"><span class="check-id">M1</span>Recency</td><td><span class="status-pill status-pass"><span aria-hidden="true">✓</span> PASS</span></td><td>last repository activity is 0 days old (recent)</td><td><ul class="evidence-list"><li>repository age: 240 days</li><li>last push: 2026-10-07</li></ul></td></tr><tr><td class="check-name"><span class="check-id">M2</span>Responsiveness</td><td><span class="status-pill status-fail"><span aria-hidden="true">×</span> FAIL</span></td><td>maintenance responsiveness is poor</td><td><ul class="evidence-list"><li>median first response: 0.0 days</li><li>pull requests merged: 13/100 (13%)</li></ul></td></tr><tr><td class="check-name"><span class="check-id">M3</span>Star plausibility</td><td><span class="status-pill status-na"><span aria-hidden="true">–</span> N/A</span></td><td>online data unavailable: GitHub API returned HTTP 401</td><td><span class="empty-evidence">—</span></td></tr></tbody>
+              </table>
+            </div>
+          </section>
+
+          <section class="panel section-panel information" aria-labelledby="information-heading"><div class="section-heading"><div><p class="eyebrow">Context</p><h2 id="information-heading">Information · not scored</h2></div></div><ul class="information-list"><li><strong>AI-assistance disclosure</strong><span>AI-assistance disclosure found</span></li></ul></section>
+        </div>
+
+        <aside class="panel inspect-panel" aria-labelledby="inspect-heading">
+          <p class="eyebrow">Priorities</p>
+          <h2 id="inspect-heading">What to inspect next</h2>
+          <p class="inspect-intro">High-leverage areas for building confidence.</p>
+          <ol class="inspection-list"><li><h3>Dependencies exist</h3><p>2 declared dependencies were not found</p><p class="why">Missing packages can reveal broken or mistaken manifests.</p></li><li><h3>Secrets patterns</h3><p>36 high-confidence secret patterns found</p><p class="why">Published credentials create concrete risk.</p></li><li><h3>Install-time risk</h3><p>install-time execution pattern found</p><p class="why">Install-time execution deserves explicit scrutiny.</p></li></ol>
+        </aside>
+      </div>
+    </main>
+
+    <footer>
+      <p>A score is a prompt for scrutiny, not a verdict on the authors.</p>
+      <p>Generated by SLOP MEETER · Online analysis · local and self-contained</p>
+    </footer>
+  </div>
+</body>
+</html>

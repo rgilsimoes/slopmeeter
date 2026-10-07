@@ -1,0 +1,15 @@
+{
+  "name": "slopmeeter-website",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Cloudflare Pages frontend for Slop Meeter.",
+  "scripts": {
+    "dev": "wrangler pages dev public",
+    "check": "node --check public/app.js",
+    "build": "npm run check",
+    "deploy": "wrangler pages deploy public --project-name=slopmeeter"
+  },
+  "devDependencies": {
+    "wrangler": "4.148.0"
+  }
+}

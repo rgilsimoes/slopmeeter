@@ -4,8 +4,16 @@ All notable changes to Slop Meeter are documented here.
 
 ## Unreleased
 
+## 0.3.0 — 2026-10-07
+
 - Aligned the coloured terminal report with the approved prototype using a block banner,
   three-column summary, segmented category bars, and reformatted complete evidence checks.
+- Added and published a responsive Cloudflare Pages website prototype with repository input,
+  representative scan progress, evidence filters, and an inspect-next report view.
+- Added production-facing website metadata, security headers, cache rules, deployment configuration,
+  and explicit messaging that the current website uses representative data.
+- Added the Slop Meeter launch article, supporting research, banner artwork, and website implementation
+  plan, together with the “Where slop meets its match” brand line.
 
 ## 0.2.0 — 2026-10-06
 
