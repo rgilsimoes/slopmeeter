@@ -1,0 +1,49 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630" role="img" aria-labelledby="title description">
+  <title id="title">Slop Meeter — Where slop meets its match</title>
+  <desc id="description">A social preview card for the Slop Meeter repository evidence checker.</desc>
+  <defs>
+    <linearGradient id="paper" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#fffdf8"/>
+      <stop offset="1" stop-color="#f2eadc"/>
+    </linearGradient>
+    <linearGradient id="meter" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#ff625d"/>
+      <stop offset="0.5" stop-color="#ffc94a"/>
+      <stop offset="1" stop-color="#54d86b"/>
+    </linearGradient>
+    <filter id="shadow" x="-30%" y="-30%" width="160%" height="160%">
+      <feDropShadow dx="0" dy="18" stdDeviation="22" flood-color="#111a2a" flood-opacity="0.16"/>
+    </filter>
+    <clipPath id="logo-clip">
+      <circle cx="936" cy="314" r="218"/>
+    </clipPath>
+  </defs>
+
+  <rect width="1200" height="630" fill="url(#paper)"/>
+  <path d="M-60 540 C230 410 390 690 690 540 S1040 410 1280 520" fill="none" stroke="#111a2a" stroke-opacity="0.07" stroke-width="70"/>
+  <circle cx="1128" cy="68" r="180" fill="#54d86b" opacity="0.10"/>
+  <circle cx="82" cy="-12" r="148" fill="#ff625d" opacity="0.10"/>
+
+  <g transform="translate(72 68)">
+    <rect width="352" height="42" rx="21" fill="#111a2a"/>
+    <circle cx="24" cy="21" r="7" fill="#54d86b"/>
+    <text x="43" y="28" fill="#ffffff" font-family="Helvetica, Arial, sans-serif" font-size="17" font-weight="700" letter-spacing="1.5">REPOSITORY EVIDENCE, EXPLAINED</text>
+
+    <text x="0" y="152" fill="#111a2a" font-family="Helvetica, Arial, sans-serif" font-size="77" font-weight="800" letter-spacing="-3">Slop Meeter</text>
+    <text x="0" y="226" fill="#111a2a" font-family="Georgia, serif" font-size="47" font-style="italic">Where slop meets its match.</text>
+
+    <text x="0" y="306" fill="#445063" font-family="Helvetica, Arial, sans-serif" font-size="27">Inspect the receipts behind a repository:</text>
+    <text x="0" y="348" fill="#445063" font-family="Helvetica, Arial, sans-serif" font-size="27">history, tests, docs, security &amp; maintenance.</text>
+
+    <g transform="translate(0 415)">
+      <rect width="536" height="18" rx="9" fill="url(#meter)"/>
+      <circle cx="387" cy="9" r="17" fill="#111a2a" stroke="#fffdf8" stroke-width="6"/>
+    </g>
+
+    <text x="0" y="496" fill="#111a2a" font-family="Helvetica, Arial, sans-serif" font-size="20" font-weight="700">DETERMINISTIC · EXPLAINABLE · NO CODE EXECUTION</text>
+  </g>
+
+  <circle cx="936" cy="314" r="234" fill="#ffffff" stroke="#111a2a" stroke-width="10" filter="url(#shadow)"/>
+  <image href="slopmeeter-logo.png" x="714" y="92" width="444" height="444" clip-path="url(#logo-clip)" preserveAspectRatio="xMidYMid slice"/>
+  <circle cx="936" cy="314" r="222" fill="none" stroke="url(#meter)" stroke-width="10"/>
+</svg>

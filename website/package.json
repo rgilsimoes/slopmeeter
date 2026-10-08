@@ -5,7 +5,8 @@
   "description": "Cloudflare Pages frontend for Slop Meeter.",
   "scripts": {
     "dev": "wrangler pages dev public",
-    "check": "node --check public/app.js",
+    "og:image": "bash scripts/generate-og-image.sh",
+    "check": "node --check public/app.js && node scripts/check-seo.mjs",
     "build": "npm run check",
     "deploy": "wrangler pages deploy public --project-name=slopmeeter"
   },
