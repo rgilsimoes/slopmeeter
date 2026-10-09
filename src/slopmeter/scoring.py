@@ -49,7 +49,13 @@ def maturity_note(commits: tuple[Commit, ...], now: datetime) -> str | None:
     return None
 
 
-def aggregate(results: list[CheckResult], commits: tuple[Commit, ...], now: datetime) -> Score:
+def aggregate(
+    results: list[CheckResult],
+    commits: tuple[Commit, ...],
+    now: datetime,
+    *,
+    history_available: bool = True,
+) -> Score:
     categories: list[CategoryScore] = []
     weighted_categories = 0.0
     applicable_category_weight = 0
@@ -73,6 +79,6 @@ def aggregate(results: list[CheckResult], commits: tuple[Commit, ...], now: date
         slop_level=round((100 - evidence_score) / 10),
         confidence=confidence,
         verdict=label(evidence_score),
-        maturity_note=maturity_note(commits, now),
+        maturity_note=maturity_note(commits, now) if history_available else None,
         categories=tuple(categories),
     )

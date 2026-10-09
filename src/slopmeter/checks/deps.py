@@ -13,7 +13,7 @@ from typing import Protocol
 
 from slopmeter.checks.base import CheckResult, result
 from slopmeter.config import Config
-from slopmeter.repo import LOCKFILE_NAMES, RepoContext
+from slopmeter.repo import LOCKFILE_NAMES, RepositoryView
 
 
 @dataclass(frozen=True)
@@ -102,7 +102,7 @@ def _python_requirement(value: str, source: str) -> Dependency | None:
     return Dependency("pypi", name, specification.strip(), pinned, source)
 
 
-def dependencies(repo: RepoContext) -> list[Dependency]:
+def dependencies(repo: RepositoryView) -> list[Dependency]:
     found: list[Dependency] = []
     for file in repo.files:
         basename = file.relative.lower().rsplit("/", 1)[-1]
@@ -136,7 +136,7 @@ def dependencies(repo: RepoContext) -> list[Dependency]:
     return sorted(unique.values(), key=lambda item: (item.ecosystem, item.name.lower()))
 
 
-def check_s1(repo: RepoContext, config: Config, declared: list[Dependency] | None = None) -> CheckResult:
+def check_s1(repo: RepositoryView, config: Config, declared: list[Dependency] | None = None) -> CheckResult:
     del config
     declared = dependencies(repo) if declared is None else declared
     locks = [file.relative for file in repo.files if file.relative.lower().rsplit("/", 1)[-1] in LOCKFILE_NAMES]
@@ -156,7 +156,7 @@ def check_s1(repo: RepoContext, config: Config, declared: list[Dependency] | Non
 
 
 def check_s2(
-    repo: RepoContext,
+    repo: RepositoryView,
     config: Config,
     client: DependencyLookup,
     declared: list[Dependency] | None = None,
@@ -181,7 +181,7 @@ def check_s2(
     return result("S2", "pass", f"all {len(declared)} declared dependencies exist")
 
 
-def check_s3(repo: RepoContext, config: Config) -> CheckResult:
+def check_s3(repo: RepositoryView, config: Config) -> CheckResult:
     del config
     risks: list[str] = []
     documented = True
@@ -217,7 +217,7 @@ SECRET_PATTERNS = {
 }
 
 
-def check_s4(repo: RepoContext, config: Config) -> CheckResult:
+def check_s4(repo: RepositoryView, config: Config) -> CheckResult:
     del config
     findings: list[str] = []
     for file in repo.files:
@@ -232,7 +232,7 @@ def check_s4(repo: RepoContext, config: Config) -> CheckResult:
     return result("S4", "pass", "no high-confidence secret patterns found")
 
 
-def run(repo: RepoContext, config: Config, online: bool = False, client: DependencyLookup | None = None) -> list[CheckResult]:
+def run(repo: RepositoryView, config: Config, online: bool = False, client: DependencyLookup | None = None) -> list[CheckResult]:
     declared = dependencies(repo)
     results = [check_s1(repo, config, declared)]
     if online:

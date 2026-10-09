@@ -5,7 +5,7 @@ from dataclasses import dataclass
 
 from slopmeter.checks.base import CheckResult, result
 from slopmeter.config import Config
-from slopmeter.repo import RepoContext
+from slopmeter.repo import RepositoryView
 
 CLAIM_PATTERN = re.compile(
     r"(?:\b\d+(?:\.\d+)?\s?(?:%|x|×)(?!\w)|\b(?:faster|improves?|reduces?|state[- ]of[- ]the[- ]art|SOTA|production[- ]ready|outperforms?)\b)",
@@ -23,7 +23,7 @@ class Claim:
     receipt: bool
 
 
-def _documentation_files(repo: RepoContext) -> list[str]:
+def _documentation_files(repo: RepositoryView) -> list[str]:
     return [
         file.relative
         for file in repo.files
@@ -34,7 +34,7 @@ def _documentation_files(repo: RepoContext) -> list[str]:
     ]
 
 
-def _link_has_receipt(repo: RepoContext, text: str) -> bool:
+def _link_has_receipt(repo: RepositoryView, text: str) -> bool:
     for match in LINK_PATTERN.finditer(text):
         target = (match.group(1) or match.group(0)).strip().split("#", 1)[0]
         if target.startswith(("http://", "https://")):
@@ -47,7 +47,7 @@ def _link_has_receipt(repo: RepoContext, text: str) -> bool:
     return False
 
 
-def extract_claims(repo: RepoContext) -> list[Claim]:
+def extract_claims(repo: RepositoryView) -> list[Claim]:
     claims: list[Claim] = []
     for path in _documentation_files(repo):
         lines = repo.read_text(path).splitlines()
@@ -73,7 +73,7 @@ def extract_claims(repo: RepoContext) -> list[Claim]:
     return claims
 
 
-def check_c1(repo: RepoContext, config: Config, claims: list[Claim] | None = None) -> CheckResult:
+def check_c1(repo: RepositoryView, config: Config, claims: list[Claim] | None = None) -> CheckResult:
     claims = extract_claims(repo) if claims is None else claims
     if not claims:
         return result("C1", "pass", "no quantitative or superlative claims found")
@@ -92,7 +92,7 @@ def check_c1(repo: RepoContext, config: Config, claims: list[Claim] | None = Non
     return result("C1", status, f"{received} of {len(claims)} claims link to evidence", evidence)
 
 
-def check_c2(repo: RepoContext, config: Config, claims: list[Claim] | None = None) -> CheckResult:
+def check_c2(repo: RepositoryView, config: Config, claims: list[Claim] | None = None) -> CheckResult:
     del config
     claims = extract_claims(repo) if claims is None else claims
     if not claims:
@@ -106,7 +106,7 @@ def check_c2(repo: RepoContext, config: Config, claims: list[Claim] | None = Non
     return result("C2", "fail", "claims found but no benchmark or evaluation harness found")
 
 
-def check_c3(repo: RepoContext, config: Config) -> CheckResult:
+def check_c3(repo: RepositoryView, config: Config) -> CheckResult:
     readme = next((file for file in repo.files if file.relative.lower() in {"readme.md", "readme.rst", "readme.txt", "readme"}), None)
     text = repo.read_text(readme.relative) if readme else ""
     words = re.findall(r"\b[\w-]+\b", text.lower())
@@ -122,6 +122,6 @@ def check_c3(repo: RepoContext, config: Config) -> CheckResult:
     return result("C3", status, f"{hits} buzzwords in {len(words)} README words ({density:.1f} per 1,000)")
 
 
-def run(repo: RepoContext, config: Config) -> list[CheckResult]:
+def run(repo: RepositoryView, config: Config) -> list[CheckResult]:
     claims = extract_claims(repo)
     return [check_c1(repo, config, claims), check_c2(repo, config, claims), check_c3(repo, config)]

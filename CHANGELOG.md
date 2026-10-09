@@ -4,6 +4,22 @@ All notable changes to Slop Meeter are documented here.
 
 ## Unreleased
 
+## 0.4.0 — 2026-10-09
+
+- Replaced the representative website preview with a real reduced assessment that runs the shared
+  Python analyzer locally in a module Web Worker through pinned, self-hosted Pyodide assets.
+- Added immutable public GitHub acquisition at an exact commit SHA with strict URL validation,
+  complete-tree checks, bounded concurrent downloads, timeouts, cancellation, and fail-closed browser
+  limits.
+- Added the `browser-reduced-v1` analysis profile, structured evidence availability, release-tag
+  fallback behavior, schema-v2 report metadata, explicit coverage, and history-aware maturity gating
+  while preserving the existing CLI report contract.
+- Added reduced-report rendering, complete-CLI callouts, self-contained HTML downloads, versioned
+  IndexedDB caching, branch freshness checks, CSP allowances, privacy disclosures, and accessible
+  unsupported, rate-limit, failure, and cancellation states.
+- Added native, acquisition-contract, Pyodide, caching, and end-to-end browser coverage for the reduced
+  assessment path.
+
 ## 0.3.0 — 2026-10-07
 
 - Aligned the coloured terminal report with the approved prototype using a block banner,

@@ -25,6 +25,8 @@ def _excluded_numstat_path(path: str) -> bool:
 
 
 def parse_history(repo: RepoContext) -> tuple[Commit, ...]:
+    """Acquire bounded history for the native repository adapter."""
+
     if not repo.is_git_repo:
         return ()
     raw = repo.git(
@@ -54,4 +56,3 @@ def parse_history(repo: RepoContext) -> tuple[Commit, ...]:
             continue
         commits.append(Commit(fields[0], fields[1].lower(), fields[2], date, fields[4], added))
     return tuple(commits)
-

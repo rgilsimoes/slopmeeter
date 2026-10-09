@@ -6,11 +6,15 @@
   "scripts": {
     "dev": "wrangler pages dev public",
     "og:image": "bash scripts/generate-og-image.sh",
-    "check": "node --check public/app.js && node scripts/check-seo.mjs && node scripts/check-preview.mjs",
-    "build": "npm run check",
+    "prepare:browser": "node scripts/prepare-browser-assets.mjs",
+    "check": "node --check public/app.js && node --check public/scan-worker.js && node scripts/check-seo.mjs && node scripts/check-browser-scan.mjs && node scripts/check-preview.mjs",
+    "check:pyodide": "node scripts/check-pyodide.mjs",
+    "build": "npm run prepare:browser && npm run check && npm run check:pyodide",
+    "test": "npm run check",
     "deploy": "wrangler pages deploy public --project-name=slopmeeter"
   },
   "devDependencies": {
+    "pyodide": "0.27.7",
     "wrangler": "4.148.0"
   }
 }

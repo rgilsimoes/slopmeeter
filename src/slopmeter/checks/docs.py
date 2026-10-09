@@ -5,7 +5,7 @@ import re
 
 from slopmeter.checks.base import CheckResult, result
 from slopmeter.config import Config
-from slopmeter.repo import LOCKFILE_NAMES, RepoContext
+from slopmeter.repo import LOCKFILE_NAMES, Evidence, RepositoryView
 
 LICENSE_MARKERS = {
     "mit": "permission is hereby granted, free of charge",
@@ -17,12 +17,12 @@ LICENSE_MARKERS = {
 }
 
 
-def _readme(repo: RepoContext) -> tuple[str, str]:
+def _readme(repo: RepositoryView) -> tuple[str, str]:
     record = next((file for file in repo.files if file.relative.lower() in {"readme", "readme.md", "readme.rst", "readme.txt"}), None)
     return (record.relative, repo.read_text(record.relative)) if record else ("README", "")
 
 
-def check_d1(repo: RepoContext, config: Config) -> CheckResult:
+def check_d1(repo: RepositoryView, config: Config) -> CheckResult:
     del config
     path, text = _readme(repo)
     if not text:
@@ -37,7 +37,7 @@ def check_d1(repo: RepoContext, config: Config) -> CheckResult:
     return result("D1", status, f"README contains {count} of 3 essentials", [f"{path}: missing {item}" for item in missing])
 
 
-def check_d2(repo: RepoContext, config: Config) -> CheckResult:
+def check_d2(repo: RepositoryView, config: Config) -> CheckResult:
     del config
     licenses = [file for file in repo.files if file.relative.lower().rsplit("/", 1)[-1].startswith(("license", "licence", "copying"))]
     if not licenses:
@@ -50,23 +50,31 @@ def check_d2(repo: RepoContext, config: Config) -> CheckResult:
     return result("D2", "warn", "license file text was not recognized", [file.relative for file in licenses])
 
 
-def check_d3(repo: RepoContext, config: Config) -> CheckResult:
+def check_d3(
+    repo: RepositoryView,
+    config: Config,
+    tags: Evidence[tuple[str, ...]] | None = None,
+) -> CheckResult:
     del config
-    tags = repo.git("tag", "--list", check=False).splitlines() if repo.is_git_repo else []
+    tag_evidence = tags or repo.tags()
     changelogs = []
     for file in repo.files:
         basename = file.relative.lower().rsplit("/", 1)[-1]
         stem = basename.split(".", 1)[0]
         if stem in {"changelog", "changes", "history"} and (file.suffix in {"", ".md", ".rst", ".txt"}):
             changelogs.append(file.relative)
-    if tags:
-        return result("D3", "pass", f"{len(tags)} release tag{'s' if len(tags) != 1 else ''} found", tags[:10])
+    tag_names = tag_evidence.value or ()
+    if tag_names:
+        return result("D3", "pass", f"{len(tag_names)} release tag{'s' if len(tag_names) != 1 else ''} found", list(tag_names[:10]))
     if changelogs:
-        return result("D3", "warn", "changelog found without a release tag", changelogs)
+        message = "changelog found; release tags could not be checked" if not tag_evidence.available else "changelog found without a release tag"
+        return result("D3", "warn", message, changelogs)
+    if not tag_evidence.available:
+        return result("D3", "na", tag_evidence.reason or "release tag lookup was unavailable")
     return result("D3", "fail", "no release tags or changelog found")
 
 
-def check_d4(repo: RepoContext, config: Config) -> CheckResult:
+def check_d4(repo: RepositoryView, config: Config) -> CheckResult:
     eligible = [file for file in repo.files if file.relative.lower().rsplit("/", 1)[-1] not in LOCKFILE_NAMES]
     total = sum(file.size for file in eligible)
     code = sum(file.size for file in eligible if file.is_code)
@@ -111,7 +119,7 @@ def _python_placeholders(text: str) -> tuple[int, int]:
     return len(functions), placeholders
 
 
-def check_d5(repo: RepoContext, config: Config) -> CheckResult:
+def check_d5(repo: RepositoryView, config: Config) -> CheckResult:
     functions = placeholders = markers = 0
     for file in repo.files:
         if file.is_binary:
@@ -133,5 +141,9 @@ def check_d5(repo: RepoContext, config: Config) -> CheckResult:
     return result("D5", status, f"{placeholders} empty functions and {markers} placeholder markers", [f"density: {density:.1%}"])
 
 
-def run(repo: RepoContext, config: Config) -> list[CheckResult]:
-    return [check_d1(repo, config), check_d2(repo, config), check_d3(repo, config), check_d4(repo, config), check_d5(repo, config)]
+def run(
+    repo: RepositoryView,
+    config: Config,
+    tags: Evidence[tuple[str, ...]] | None = None,
+) -> list[CheckResult]:
+    return [check_d1(repo, config), check_d2(repo, config), check_d3(repo, config, tags), check_d4(repo, config), check_d5(repo, config)]

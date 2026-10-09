@@ -5,14 +5,28 @@
   "type": "object",
   "required": ["schema_version", "tool", "target", "mode", "evidence_score", "slop_level", "confidence", "verdict", "maturity_note", "categories", "checks"],
   "properties": {
-    "schema_version": {"const": 1},
+    "schema_version": {"enum": [1, 2]},
     "tool": {
       "type": "object",
       "required": ["name", "version"],
       "properties": {"name": {"const": "slopmeter"}, "version": {"type": "string"}}
     },
     "target": {"type": "string"},
-    "mode": {"enum": ["offline", "online"]},
+    "mode": {"enum": ["offline", "online", "browser"]},
+    "analysis_profile": {"type": "string"},
+    "analyzer_version": {"type": "string"},
+    "revision": {"type": ["string", "null"]},
+    "coverage": {
+      "type": "object",
+      "required": ["run", "unavailable"],
+      "properties": {
+        "run": {"type": "array", "items": {"type": "string"}},
+        "unavailable": {"type": "array", "items": {"type": "string"}},
+        "maximum_confidence": {"type": "number", "minimum": 0, "maximum": 100}
+      },
+      "additionalProperties": false
+    },
+    "acquisition": {"type": "object"},
     "evidence_score": {"type": "number", "minimum": 0, "maximum": 100},
     "slop_level": {"type": "integer", "minimum": 0, "maximum": 10},
     "confidence": {"type": "number", "minimum": 0, "maximum": 100},

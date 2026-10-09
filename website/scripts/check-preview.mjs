@@ -10,15 +10,11 @@ assert.match(html, /<details id="run-log"[^>]*>/, 'the preview exposes a collaps
 assert.match(html, /id="run-log-entries"/, 'the run log has an entry container');
 assert.doesNotMatch(html, /<details id="run-log"[^>]*\sopen(?:\s|>)/, 'the run log starts collapsed');
 
-assert.match(
-  app,
-  /Representative report displayed[^'"`]*not derived from/i,
-  'completion says the report was not derived from the submitted repository',
-);
-assert.match(
-  app,
-  /No repository data (?:was|is being) fetched or analyzed/i,
-  'the log discloses that the preview performs no repository analysis',
-);
+assert.match(html, /Reduced browser assessment/, 'the UI labels reduced results clearly');
+assert.match(html, /14 of 23 checks/, 'the UI publishes browser coverage');
+assert.match(html, /Run the complete assessment/, 'the UI provides the CLI route');
+assert.match(app, /new Worker\(/, 'the scan runs in a Web Worker');
+assert.match(app, /indexedDB/, 'successful reports use browser caching');
+assert.doesNotMatch(app, /representative report/i, 'the old representative-data simulation is gone');
 
-console.log('Preview disclosure check passed.');
+console.log('Browser assessment disclosure check passed.');

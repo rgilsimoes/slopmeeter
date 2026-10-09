@@ -68,7 +68,7 @@
       <span><strong>Slop Meeter</strong><small>Where slop meets its match.</small></span>
     </a>
     <nav aria-label="Primary navigation">
-      <a id="sample-report-link" href="#sample-report">Sample report</a>
+      <a id="sample-report-link" href="#browser-report">Browser report</a>
       <a href="https://github.com/rgilsimoes/slopmeeter/blob/main/docs/METHODOLOGY.md">Methodology</a>
       <a class="github-link" href="https://github.com/rgilsimoes/slopmeeter">GitHub</a>
     </nav>
@@ -77,26 +77,27 @@
   <main id="top">
     <section class="scanner-section" aria-labelledby="scanner-title">
       <div class="scanner-copy">
-        <p class="eyebrow"><span></span> Repository report preview</p>
+        <p class="eyebrow"><span></span> Reduced browser assessment</p>
         <h1 id="scanner-title">Bring the repository.<br><em>We’ll look for receipts.</em></h1>
-        <p class="lede">A deterministic evidence check for history, tests, claims, documentation, dependencies, security and maintenance. No authorship guessing. No code execution.</p>
+        <p class="lede">A deterministic local check of a public repository’s tests, claims, documentation and security evidence. No authorship guessing. No repository code execution.</p>
 
         <form id="scan-form" class="scan-form">
           <label for="repo-url">GitHub repository</label>
           <div class="input-row">
             <span class="input-icon" aria-hidden="true">&lt;/&gt;</span>
-            <input id="repo-url" name="repo" type="url" value="https://github.com/example/some-tool" placeholder="https://github.com/owner/repository" required>
-            <button id="scan-button" type="submit"><span>Preview analysis</span><b aria-hidden="true">↗</b></button>
+            <input id="repo-url" name="repo" type="url" value="https://github.com/octocat/Hello-World" placeholder="https://github.com/owner/repository" required>
+            <button id="scan-button" type="submit"><span>Run browser assessment</span><b aria-hidden="true">↗</b></button>
           </div>
           <div class="form-meta">
             <span><i class="safety-dot"></i> Public repositories only</span>
-            <span>Preview uses representative data</span>
+            <span>Runs locally · no repository content sent to us</span>
+            <span>3,000 files · 60 MiB · 1 MiB per file</span>
           </div>
         </form>
 
         <div class="sample-links" aria-label="Example repositories">
           <span>Try a sample</span>
-          <button type="button" data-repo="https://github.com/rgilsimoes/slopmeeter">Slop Meeter</button>
+          <button type="button" data-repo="https://github.com/octocat/Hello-World">Hello World</button>
           <button type="button" data-repo="https://github.com/pallets/flask">Flask</button>
           <button type="button" data-repo="https://github.com/BurntSushi/ripgrep">ripgrep</button>
         </div>
@@ -109,50 +110,52 @@
     </section>
 
     <section id="scan-progress" class="scan-progress" aria-live="polite" hidden>
-      <div class="progress-copy"><strong id="progress-title">Preparing representative preview</strong><span id="progress-value">18%</span></div>
+      <div class="progress-copy"><strong id="progress-title">Loading browser analyzer</strong><span id="progress-value">0%</span></div>
       <div class="progress-track"><i id="progress-bar"></i></div>
-      <p id="progress-stage">No repository data is fetched or analyzed in preview mode.</p>
+      <p id="progress-stage">The assessment runs locally in a dedicated browser worker.</p>
+      <button id="cancel-scan" class="cancel-button" type="button">Cancel scan</button>
     </section>
 
     <details id="run-log" class="run-log" hidden>
       <summary>
-        <span><i aria-hidden="true">›_</i> Preview run log</span>
+        <span><i aria-hidden="true">›_</i> Browser assessment log</span>
         <b id="run-log-status">Waiting to start</b>
       </summary>
       <div class="run-log-body">
-        <p>This log describes the browser-only demonstration. It does not represent a live Slop Meeter analysis.</p>
+        <p>Observable browser acquisition and analysis events. Repository contents and matched secrets are never logged.</p>
         <ol id="run-log-entries" aria-live="polite"></ol>
       </div>
     </details>
 
-    <section id="sample-report" class="report-shell" aria-labelledby="report-title">
-      <div class="prototype-note"><span>Interactive prototype</span> Results below are representative mock data.</div>
+    <section id="browser-report" class="report-shell" aria-labelledby="report-title" hidden>
+      <div class="prototype-note"><span>Reduced browser assessment</span> This is not the complete CLI assessment.</div>
 
       <header class="report-header">
         <div>
-          <p class="eyebrow">Representative preview</p>
+          <p class="eyebrow">Exact public commit</p>
           <h2 id="report-title">Repository evidence report</h2>
-          <p class="target" id="report-target"><span aria-hidden="true">&lt;/&gt;</span> github.com/example/some-tool</p>
+          <p class="target" id="report-target"><span aria-hidden="true">&lt;/&gt;</span></p>
+          <p class="revision" id="report-revision"></p>
         </div>
         <div class="report-badges">
-          <span class="badge online">● Preview mode</span>
+          <span class="badge online">● Reduced browser assessment</span>
           <span class="badge safe">✓ No code executed</span>
         </div>
       </header>
 
       <section class="summary-panel panel" aria-label="Report summary">
         <div class="score-card">
-          <div class="score-ring" role="img" aria-label="Evidence score 64 out of 100">
-            <div class="score-inner"><strong>64</strong><span>Evidence score</span><small>out of 100</small></div>
+          <div class="score-ring" id="score-ring" role="img" aria-label="Browser evidence score">
+            <div class="score-inner"><strong id="report-score">—</strong><span>Browser evidence score</span><small>out of 100</small></div>
           </div>
         </div>
-        <div class="metric"><span>Slop level</span><strong>4 <small>/ 10</small></strong><p>Lower is better</p></div>
-        <div class="metric"><span>Confidence</span><strong>91%</strong><p>Most checks available</p></div>
+        <div class="metric"><span>Slop level</span><strong id="report-slop">— <small>/ 10</small></strong><p>Lower is better</p></div>
+        <div class="metric"><span>Confidence</span><strong id="report-confidence">63%</strong><p id="coverage-summary">14 of 23 checks run</p></div>
         <div class="verdict">
           <i aria-hidden="true">✓</i>
-          <div><span>Verdict</span><strong>Promising. Some receipts.</strong><p>The repository shows credible work, with a few evidence gaps to inspect.</p></div>
+          <div><span>Reduced-set verdict</span><strong id="report-verdict">—</strong><p>The verdict applies only to the reduced browser evidence set.</p></div>
         </div>
-        <div class="maturity-note"><b>⌁</b><p><span>Maturity note</span><strong>Too early to tell — 11 commits over 9 days</strong><small>A short history limits long-term signals. Reassess as the project evolves.</small></p></div>
+        <div class="maturity-note cli-callout"><b>⌁</b><p><span>Complete assessment</span><strong>This browser scan does not inspect history, registries or maintenance.</strong><small>Run the CLI for the complete assessment.</small></p><button type="button" class="primary-action" data-show-cli>Run the complete assessment</button></div>
       </section>
 
       <div class="report-grid">
@@ -162,37 +165,24 @@
               <div><p class="eyebrow">Overview</p><h3 id="category-title">Category scores</h3></div>
               <p>A balanced view across applicable evidence areas.</p>
             </div>
-            <div class="category-list">
-              <div class="category-row"><span>History &amp; substance</span><strong>55</strong><progress class="warn-bar" max="100" value="55">55</progress><small>Some activity, limited history.</small></div>
-              <div class="category-row"><span>Tests &amp; CI</span><strong>90</strong><progress class="pass-bar" max="100" value="90">90</progress><small>Strong tests and CI signals.</small></div>
-              <div class="category-row"><span>Claims vs. receipts</span><strong>50</strong><progress class="warn-bar" max="100" value="50">50</progress><small>Some claims lack linked evidence.</small></div>
-              <div class="category-row"><span>Docs, release &amp; composition</span><strong>72</strong><progress class="accent-bar" max="100" value="72">72</progress><small>Useful docs; release trail is thin.</small></div>
-              <div class="category-row"><span>Dependencies &amp; security</span><strong>80</strong><progress class="pass-bar" max="100" value="80">80</progress><small>Reasonable dependency hygiene.</small></div>
-              <div class="category-row"><span>Maintenance &amp; attention</span><strong>58</strong><progress class="warn-bar" max="100" value="58">58</progress><small>Early signals; more time will help.</small></div>
-            </div>
+            <div id="category-list" class="category-list"></div>
           </section>
 
           <section class="panel checks-panel" aria-labelledby="checks-title">
             <div class="panel-heading checks-heading">
               <div><p class="eyebrow">Details</p><h3 id="checks-title">Evidence checks</h3></div>
               <div class="filters" role="group" aria-label="Filter evidence checks">
-                <button type="button" class="active" data-filter="all">All <b>6</b></button>
-                <button type="button" data-filter="pass">Pass <b>3</b></button>
-                <button type="button" data-filter="warn">Warn <b>2</b></button>
-                <button type="button" data-filter="fail">Fail <b>1</b></button>
+                <button type="button" class="active" data-filter="all">All <b>0</b></button>
+                <button type="button" data-filter="pass">Pass <b>0</b></button>
+                <button type="button" data-filter="warn">Warn <b>0</b></button>
+                <button type="button" data-filter="fail">Fail <b>0</b></button>
+                <button type="button" data-filter="cli">CLI only <b>0</b></button>
               </div>
             </div>
             <div class="table-scroll">
               <table>
                 <thead><tr><th>Check</th><th>Status</th><th>Finding</th><th>Evidence</th></tr></thead>
-                <tbody>
-                  <tr data-status="warn"><td><code>H2</code> Largest-commit share</td><td><span class="status warn">▲ Warn</span></td><td>Largest commit holds 58% of added lines.</td><td><a href="#">commit a1b2c3</a></td></tr>
-                  <tr data-status="pass"><td><code>T2</code> Tests assert</td><td><span class="status pass">✓ Pass</span></td><td>9 of 10 test functions contain meaningful assertions.</td><td><a href="#">tests/ (9/10)</a></td></tr>
-                  <tr data-status="warn"><td><code>C1</code> Claims have receipts</td><td><span class="status warn">▲ Warn</span></td><td>2 of 4 key claims link to evidence.</td><td><a href="#">README.md:42</a></td></tr>
-                  <tr data-status="pass"><td><code>D1</code> README essentials</td><td><span class="status pass">✓ Pass</span></td><td>Description, installation and usage are present.</td><td><a href="#">README.md</a></td></tr>
-                  <tr data-status="fail"><td><code>D3</code> Release hygiene</td><td><span class="status fail">× Fail</span></td><td>No tag or changelog was found.</td><td><span>—</span></td></tr>
-                  <tr data-status="pass"><td><code>S4</code> Secret patterns</td><td><span class="status pass">✓ Pass</span></td><td>No high-confidence credential patterns found.</td><td><span>28 files checked</span></td></tr>
-                </tbody>
+                <tbody id="checks-body"></tbody>
               </table>
               <p id="empty-filter" class="empty-filter" hidden>No checks match this filter.</p>
             </div>
@@ -203,14 +193,24 @@
           <p class="eyebrow">Priorities</p>
           <h3 id="inspect-title">What to inspect next</h3>
           <p class="inspect-intro">Three high-leverage places to build confidence.</p>
-          <ol>
-            <li><span>1</span><div><strong>Review the largest commit</strong><p>A single commit holds 58% of added lines. Check what changed and why.</p></div></li>
-            <li><span>2</span><div><strong>Verify claims without receipts</strong><p>Two key claims need a benchmark, source or supporting material.</p></div></li>
-            <li><span>3</span><div><strong>Look for a release trail</strong><p>No tag or changelog was found. Confirm how versions are delivered.</p></div></li>
-          </ol>
+          <ol id="inspection-list"></ol>
           <a class="method-link" href="https://github.com/rgilsimoes/slopmeeter/blob/main/docs/METHODOLOGY.md">Read the methodology <span>↗</span></a>
         </aside>
       </div>
+      <section class="panel cli-panel" id="cli-panel" aria-labelledby="cli-title">
+        <p class="eyebrow">Complete assessment</p>
+        <h3 id="cli-title">Run Slop Meeter from the CLI</h3>
+        <p>This browser assessment ran 14 of 23 checks. Commit history, dependency registry verification and maintenance signals require the complete CLI assessment.</p>
+        <div class="commands"><code id="pipx-command"></code><button type="button" data-copy="pipx-command">Copy</button><code id="uv-command"></code><button type="button" data-copy="uv-command">Copy</button><code id="run-command"></code><button type="button" data-copy="run-command">Copy</button></div>
+        <button type="button" id="download-report" class="secondary-action">Download browser HTML report</button>
+      </section>
+    </section>
+
+    <section id="scan-error" class="report-shell error-state" aria-live="assertive" hidden>
+      <p class="eyebrow">Browser assessment unavailable</p>
+      <h2 id="error-title">The scan could not complete</h2>
+      <p id="error-message"></p>
+      <div class="cli-panel"><h3>Run the complete assessment</h3><div class="commands"><code id="error-pipx-command">pipx install slop-meeter</code><button type="button" data-copy="error-pipx-command">Copy</button><code id="error-uv-command">uv tool install slop-meeter</code><button type="button" data-copy="error-uv-command">Copy</button><code id="error-command"></code><button type="button" data-copy="error-command">Copy command</button></div></div>
     </section>
   </main>
 
@@ -219,6 +219,6 @@
     <p><a href="https://github.com/rgilsimoes/slopmeeter">CLI on GitHub</a><span>•</span><a href="https://slopcop.me/">Need a code-facing check? Try SlopCop.</a></p>
   </footer>
 
-  <script src="app.js" defer></script>
+  <script type="module" src="app.js"></script>
 </body>
 </html>

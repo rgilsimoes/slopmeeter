@@ -6,7 +6,7 @@ from dataclasses import dataclass
 
 from slopmeter.checks.base import CheckResult, result
 from slopmeter.config import Config
-from slopmeter.repo import FileRecord, RepoContext
+from slopmeter.repo import FileRecord, RepositoryView
 
 TEST_SUFFIXES = (".test.js", ".test.jsx", ".test.ts", ".test.tsx", "_test.go")
 TEST_DIRS = {"tests", "test", "__tests__", "spec"}
@@ -35,7 +35,7 @@ def _loc(text: str) -> int:
     return sum(1 for line in text.splitlines() if line.strip())
 
 
-def check_t1(repo: RepoContext, config: Config) -> CheckResult:
+def check_t1(repo: RepositoryView, config: Config) -> CheckResult:
     test_files = [file for file in repo.files if file.is_code and is_test_file(file)]
     source_files = [file for file in repo.files if file.is_code and not is_test_file(file)]
     test_loc = sum(_loc(repo.read_text(file.relative)) for file in test_files)
@@ -94,7 +94,7 @@ def _js_test_functions(text: str) -> list[tuple[str, bool]]:
     return found
 
 
-def check_t2(repo: RepoContext, config: Config) -> CheckResult:
+def check_t2(repo: RepositoryView, config: Config) -> CheckResult:
     tests: list[tuple[str, str, bool]] = []
     parse_errors: list[str] = []
     supported_files = 0
@@ -140,7 +140,7 @@ def check_t2(repo: RepoContext, config: Config) -> CheckResult:
     return result("T2", status, message, (parse_errors + missing)[:20])
 
 
-def check_t3(repo: RepoContext, config: Config) -> CheckResult:
+def check_t3(repo: RepositoryView, config: Config) -> CheckResult:
     del config
     ci_files = [file for file in repo.files if file.relative.startswith(CI_PATHS) or file.relative in CI_PATHS]
     if not ci_files:
@@ -151,5 +151,5 @@ def check_t3(repo: RepoContext, config: Config) -> CheckResult:
     return result("T3", "warn", "CI exists but no test command was found", [file.relative for file in ci_files])
 
 
-def run(repo: RepoContext, config: Config) -> list[CheckResult]:
+def run(repo: RepositoryView, config: Config) -> list[CheckResult]:
     return [check_t1(repo, config), check_t2(repo, config), check_t3(repo, config)]

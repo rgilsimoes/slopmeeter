@@ -4,6 +4,7 @@ from dataclasses import asdict, dataclass
 
 from slopmeter import __version__
 from slopmeter.checks.base import CHECK_BY_ID, CHECKS, CheckResult
+from slopmeter.profiles import AnalysisProfile
 from slopmeter.scoring import CategoryScore, Score
 
 
@@ -82,13 +83,20 @@ def _number(value: float) -> int | float:
 
 
 def report_data(
-    target: str, results: list[CheckResult], score: Score, online: bool
+    target: str,
+    results: list[CheckResult],
+    score: Score,
+    online: bool,
+    *,
+    profile: AnalysisProfile | None = None,
+    revision: str | None = None,
+    acquisition: dict[str, object] | None = None,
 ) -> dict[str, object]:
-    return {
-        "schema_version": 1,
+    data: dict[str, object] = {
+        "schema_version": 2 if profile else 1,
         "tool": {"name": "slopmeter", "version": __version__},
         "target": target,
-        "mode": "online" if online else "offline",
+        "mode": "browser" if profile else ("online" if online else "offline"),
         "evidence_score": _number(score.evidence_score),
         "slop_level": score.slop_level,
         "confidence": _number(score.confidence * 100),
@@ -103,6 +111,26 @@ def report_data(
         ],
         "checks": [item.as_dict() for item in results],
     }
+    if profile:
+        total_weight = sum(check.weight for check in CHECKS if check.weight > 0)
+        run_ids = set(profile.run)
+        maximum_weight = sum(
+            check.weight for check in CHECKS if check.id in run_ids and check.weight > 0
+        )
+        data.update(
+            {
+                "analysis_profile": profile.id,
+                "analyzer_version": __version__,
+                "revision": revision,
+                "coverage": {
+                    "run": list(profile.run),
+                    "unavailable": list(profile.unavailable),
+                    "maximum_confidence": _number(100 * maximum_weight / total_weight),
+                },
+                "acquisition": acquisition or {},
+            }
+        )
+    return data
 
 
 def render_json(target: str, results: list[CheckResult], score: Score, online: bool) -> str:
