@@ -1,5 +1,10 @@
 # Slop Meeter website implementation plan
 
+> **Architecture option under evaluation:**
+> [`PYODIDE_BROWSER_SCAN_PLAN.md`](PYODIDE_BROWSER_SCAN_PLAN.md) defines a reduced assessment that runs
+> the shared Python checks in the visitor's browser with no scan-compute infrastructure. The plan below
+> remains the route to a hosted assessment with full CLI parity.
+
 ## Product decision
 
 Build the website as a low-friction public demo and report viewer while keeping the CLI as the canonical

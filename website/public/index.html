@@ -77,7 +77,7 @@
   <main id="top">
     <section class="scanner-section" aria-labelledby="scanner-title">
       <div class="scanner-copy">
-        <p class="eyebrow"><span></span> Public repository scan</p>
+        <p class="eyebrow"><span></span> Repository report preview</p>
         <h1 id="scanner-title">Bring the repository.<br><em>We’ll look for receipts.</em></h1>
         <p class="lede">A deterministic evidence check for history, tests, claims, documentation, dependencies, security and maintenance. No authorship guessing. No code execution.</p>
 
@@ -109,22 +109,33 @@
     </section>
 
     <section id="scan-progress" class="scan-progress" aria-live="polite" hidden>
-      <div class="progress-copy"><strong id="progress-title">Fetching repository metadata</strong><span id="progress-value">18%</span></div>
+      <div class="progress-copy"><strong id="progress-title">Preparing representative preview</strong><span id="progress-value">18%</span></div>
       <div class="progress-track"><i id="progress-bar"></i></div>
-      <p id="progress-stage">Nothing from the target repository is being executed.</p>
+      <p id="progress-stage">No repository data is fetched or analyzed in preview mode.</p>
     </section>
+
+    <details id="run-log" class="run-log" hidden>
+      <summary>
+        <span><i aria-hidden="true">›_</i> Preview run log</span>
+        <b id="run-log-status">Waiting to start</b>
+      </summary>
+      <div class="run-log-body">
+        <p>This log describes the browser-only demonstration. It does not represent a live Slop Meeter analysis.</p>
+        <ol id="run-log-entries" aria-live="polite"></ol>
+      </div>
+    </details>
 
     <section id="sample-report" class="report-shell" aria-labelledby="report-title">
       <div class="prototype-note"><span>Interactive prototype</span> Results below are representative mock data.</div>
 
       <header class="report-header">
         <div>
-          <p class="eyebrow">Repository analysis</p>
+          <p class="eyebrow">Representative preview</p>
           <h2 id="report-title">Repository evidence report</h2>
           <p class="target" id="report-target"><span aria-hidden="true">&lt;/&gt;</span> github.com/example/some-tool</p>
         </div>
         <div class="report-badges">
-          <span class="badge online">● Online analysis</span>
+          <span class="badge online">● Preview mode</span>
           <span class="badge safe">✓ No code executed</span>
         </div>
       </header>
