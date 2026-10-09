@@ -28,9 +28,9 @@ def main() -> None:
         "Requires-Python: >=3.11\n\n"
     ).encode()
     members[f"{dist_info}/WHEEL"] = (
-        "Wheel-Version: 1.0\nGenerator: slop-meeter-browser-build\n"
-        "Root-Is-Purelib: true\nTag: py3-none-any\n"
-    ).encode()
+        b"Wheel-Version: 1.0\nGenerator: slop-meeter-browser-build\n"
+        b"Root-Is-Purelib: true\nTag: py3-none-any\n"
+    )
     record_path = f"{dist_info}/RECORD"
     records = []
     for name, contents in sorted(members.items()):

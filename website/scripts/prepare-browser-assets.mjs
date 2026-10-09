@@ -24,7 +24,7 @@ await Promise.all(runtimeFiles.map((name) => cp(join(pyodideSource, name), join(
 await new Promise((resolvePromise, reject) => {
   const build = spawn('python3', [
     join(website, 'scripts', 'build-browser-wheel.py'),
-    join(destination, 'slop_meeter-0.4.0-py3-none-any.whl'),
+    join(destination, 'slop_meeter-0.4.1-py3-none-any.whl'),
   ], { stdio: 'inherit' });
   build.on('exit', (code) => code === 0 ? resolvePromise() : reject(new Error(`wheel build exited with ${code}`)));
   build.on('error', reject);

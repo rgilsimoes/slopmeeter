@@ -121,7 +121,7 @@ complete successfully. Without it, reports continue to be written to stdout.
 ███████║███████╗╚██████╔╝██║         ██║ ╚═╝ ██║███████╗███████╗   ██║   ███████╗██║  ██║
 ╚══════╝╚══════╝ ╚═════╝ ╚═╝         ╚═╝     ╚═╝╚══════╝╚══════╝   ╚═╝   ╚══════╝╚═╝  ╚═╝
 score the evidence, not the vibes
-v0.4.0 · target ./some-tool
+v0.4.1 · target ./some-tool
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────────
 64 / 100                   │ Slop level  4 / 10           │ Promising. Some receipts.

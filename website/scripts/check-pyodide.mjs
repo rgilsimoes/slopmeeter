@@ -6,7 +6,7 @@ import { loadPyodide } from 'pyodide';
 
 const website = fileURLToPath(new URL('../', import.meta.url));
 const pyodide = await loadPyodide();
-const wheel = new Uint8Array(await readFile(join(website, 'public/vendor/slop_meeter-0.4.0-py3-none-any.whl')));
+const wheel = new Uint8Array(await readFile(join(website, 'public/vendor/slop_meeter-0.4.1-py3-none-any.whl')));
 const sitePackages = pyodide.runPython("import sysconfig; sysconfig.get_paths()['purelib']");
 pyodide.unpackArchive(wheel, 'zip', { extractDir: sitePackages });
 pyodide.runPython('from slopmeter.browser import analyze_browser_snapshot');

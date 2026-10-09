@@ -17,7 +17,7 @@ async function loadAnalyzer(runId) {
       const runtimeBase = new URL('./vendor/pyodide-0.27.7/', self.location.href);
       const runtime = await import(new URL('pyodide.mjs', runtimeBase));
       const pyodide = await runtime.loadPyodide({ indexURL: runtimeBase.href });
-      const wheelUrl = new URL('./vendor/slop_meeter-0.4.0-py3-none-any.whl', self.location.href);
+      const wheelUrl = new URL('./vendor/slop_meeter-0.4.1-py3-none-any.whl', self.location.href);
       const wheel = await fetch(wheelUrl, { cache: 'force-cache' });
       if (!wheel.ok) throw new Error(`browser analyzer wheel unavailable (HTTP ${wheel.status})`);
       const sitePackages = pyodide.runPython("import sysconfig; sysconfig.get_paths()['purelib']");

@@ -1,4 +1,4 @@
-export const ANALYZER_VERSION = '0.4.0';
+export const ANALYZER_VERSION = '0.4.1';
 export const PROFILE_VERSION = 'browser-reduced-v1';
 export const LIMIT_VERSION = 'browser-limits-v1';
 export const DEFAULT_CONFIG_HASH = 'sha256-48b708dcfb53f93a033f2f7528252626ffbcfaed6d390a5428810adbd76387c9';

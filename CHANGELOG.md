@@ -4,6 +4,10 @@ All notable changes to Slop Meeter are documented here.
 
 ## Unreleased
 
+## 0.4.1 — 2026-10-09
+
+- Fixed the browser-wheel build script to satisfy the repository-wide Ruff checks used by CI.
+
 ## 0.4.0 — 2026-10-09
 
 - Replaced the representative website preview with a real reduced assessment that runs the shared
