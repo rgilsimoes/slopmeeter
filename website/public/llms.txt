@@ -1,0 +1,27 @@
+# Slop Meeter
+
+> Slop Meeter is a deterministic repository assessment tool that scores observable evidence, not AI authorship, aesthetics, or intent.
+
+Slop Meeter inspects repository history, tests and CI, claims and their receipts, documentation and releases, dependencies and security, and optional online maintenance signals. Target repositories are treated as untrusted input and are never executed.
+
+## Start here
+
+- [Project overview and CLI usage](https://raw.githubusercontent.com/rgilsimoes/slopmeeter/main/README.md): Installation, commands, reports, configuration, safety, and limitations.
+- [Complete methodology](https://raw.githubusercontent.com/rgilsimoes/slopmeeter/main/docs/METHODOLOGY.md): Every check, weight, threshold, rationale, and scoring rule.
+- [Agent and CI integration](https://raw.githubusercontent.com/rgilsimoes/slopmeeter/main/docs/AGENT_INTEGRATION.md): How to add project instructions, an audit prompt, a Codex hook, and CI enforcement.
+- [JSON report schema](https://raw.githubusercontent.com/rgilsimoes/slopmeeter/main/docs/REPORT_SCHEMA.json): Machine-readable report contract.
+
+## Agent templates
+
+- [AGENTS.md template](https://raw.githubusercontent.com/rgilsimoes/slopmeeter/main/integrations/AGENTS.md): Persistent evidence-review instructions for coding agents.
+- [Repository audit prompt](https://raw.githubusercontent.com/rgilsimoes/slopmeeter/main/integrations/prompts/slop-review.md): Portable read-only audit workflow.
+- [Codex hook configuration](https://raw.githubusercontent.com/rgilsimoes/slopmeeter/main/integrations/codex/hooks.json): Run one Slop Meeter review before a Codex turn finishes.
+- [Codex hook helper](https://raw.githubusercontent.com/rgilsimoes/slopmeeter/main/integrations/codex/hooks/slopmeter_stop.py): Execute the offline scan and return concise hook feedback.
+- [GitHub Actions workflow](https://raw.githubusercontent.com/rgilsimoes/slopmeeter/main/integrations/github/slopmeter.yml): Store a JSON report and enforce an evidence floor.
+
+## Important interpretation
+
+- The evidence score and confidence must be read together.
+- `na` means a check was unavailable or not applicable; it is not a failure.
+- Young repositories receive a maturity note because they cannot yet provide deep historical evidence.
+- Findings are explainable review prompts, not proof of fraud or low-quality authorship.

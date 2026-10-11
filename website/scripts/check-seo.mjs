@@ -37,6 +37,7 @@ for (const name of ["description", "robots", "twitter:card", "twitter:title", "t
 
 requireMatch(new RegExp(`<link rel="canonical" href="${canonicalUrl}">`), "Canonical URL is missing or incorrect");
 requireMatch(new RegExp(`<meta property="og:image" content="${imageUrl}">`), "Open Graph image URL is incorrect");
+requireMatch(/<a href="llms\.txt">Agent docs \(llms\.txt\)<\/a>/, "The site must visibly link to llms.txt");
 
 const jsonLdMatch = html.match(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/);
 if (!jsonLdMatch) {
@@ -63,6 +64,19 @@ if (!robots.includes("Allow: /") || !robots.includes(`Sitemap: ${canonicalUrl}si
 const sitemap = readFileSync(join(root, "sitemap.xml"), "utf8");
 if (!sitemap.includes(`<loc>${canonicalUrl}</loc>`)) {
   throw new Error("sitemap.xml must contain the canonical home page");
+}
+
+const llms = readFileSync(join(root, "llms.txt"), "utf8");
+for (const requiredText of [
+  "# Slop Meeter",
+  "## Start here",
+  "Complete methodology",
+  "Agent and CI integration",
+  "JSON report schema",
+]) {
+  if (!llms.includes(requiredText)) {
+    throw new Error(`llms.txt is missing required content: ${requiredText}`);
+  }
 }
 
 JSON.parse(readFileSync(join(root, "site.webmanifest"), "utf8"));

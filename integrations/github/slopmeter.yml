@@ -1,0 +1,30 @@
+name: Slop Meeter
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  evidence:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install Slop Meeter
+        run: python -m pip install "slop-meeter==0.5.0"
+      - name: Generate report and enforce evidence floor
+        run: slopmeter . --format json --output slopmeter-report.json --fail-under 40
+      - name: Upload Slop Meeter report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: slopmeter-report
+          path: slopmeter-report.json
+          if-no-files-found: warn

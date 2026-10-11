@@ -93,6 +93,18 @@ While an analysis is running in an interactive terminal, Slop Meeter shows a spi
 status messages such as “Deslopifying” and “Unsloptastic”. The indicator is written to stderr and
 automatically disabled for pipes and redirected output, so reports remain machine-readable.
 
+## Agent and CI integration
+
+The [agent integration guide](docs/AGENT_INTEGRATION.md) provides copyable templates for:
+
+- project-level `AGENTS.md` instructions;
+- a reusable repository-audit prompt;
+- a Codex `Stop` hook that requests one evidence-review pass before the agent finishes; and
+- a GitHub Actions workflow that stores the JSON report and enforces an evidence floor.
+
+These integrations invoke the CLI instead of duplicating its rules, so the installed Slop Meeter
+version and [methodology](docs/METHODOLOGY.md) remain the source of truth.
+
 ## Reports
 
 Interactive text output uses colour when stdout is a compatible terminal. `--color always` forces
@@ -121,7 +133,7 @@ complete successfully. Without it, reports continue to be written to stdout.
 ███████║███████╗╚██████╔╝██║         ██║ ╚═╝ ██║███████╗███████╗   ██║   ███████╗██║  ██║
 ╚══════╝╚══════╝ ╚═════╝ ╚═╝         ╚═╝     ╚═╝╚══════╝╚══════╝   ╚═╝   ╚══════╝╚═╝  ╚═╝
 score the evidence, not the vibes
-v0.4.1 · target ./some-tool
+v0.5.0 · target ./some-tool
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────────
 64 / 100                   │ Slop level  4 / 10           │ Promising. Some receipts.

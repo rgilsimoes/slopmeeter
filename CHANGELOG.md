@@ -4,6 +4,16 @@ All notable changes to Slop Meeter are documented here.
 
 ## Unreleased
 
+## 0.5.0 — 2026-10-11
+
+- Added an agent integration kit with copyable `AGENTS.md` guidance, a read-only audit prompt, a
+  Codex `Stop` hook, and a GitHub Actions evidence gate.
+- Published `llms.txt` for agent discovery and documented how to combine advisory agent review with
+  authoritative CI enforcement without duplicating or gaming Slop Meeter rules; the website footer
+  links to the file directly.
+- Restored the website's “Sample report” navigation option and pointed it to a self-contained full CLI
+  report instead of the reduced browser-report area.
+
 ## 0.4.1 — 2026-10-09
 
 - Fixed the browser-wheel build script to satisfy the repository-wide Ruff checks used by CI.

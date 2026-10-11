@@ -15,7 +15,6 @@ const runLogStatus = $('#run-log-status');
 const runLogEntries = $('#run-log-entries');
 const reportSection = $('#browser-report');
 const errorSection = $('#scan-error');
-const sampleReportLink = $('#sample-report-link');
 
 const STATUS = {
   pass: ['✓', 'Pass'], warn: ['▲', 'Warn'], fail: ['×', 'Fail'], na: ['–', 'N/A'], cli: ['–', 'CLI only'], info: ['i', 'Info'],
@@ -74,7 +73,6 @@ function resetRun() {
   scanButton.querySelector('span').textContent = 'Assessing repository…';
   cancelButton.hidden = false;
   errorSection.hidden = true;
-  sampleReportLink.hidden = true;
   updateProgress(0, 'Loading browser analyzer', 'Starting an isolated module worker.');
 }
 
@@ -83,7 +81,6 @@ function finishRun() {
   scanButton.disabled = false;
   scanButton.querySelector('span').textContent = 'Run browser assessment';
   cancelButton.hidden = true;
-  sampleReportLink.hidden = false;
 }
 
 function openDatabase() {
