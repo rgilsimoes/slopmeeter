@@ -13,6 +13,7 @@ from slopmeter.analyzer import analyze
 from slopmeter.checks.base import CHECKS
 from slopmeter.checks.online import GitHubClient
 from slopmeter.config import load_config
+from slopmeter.onboarding import run_init
 from slopmeter.progress import ProgressIndicator
 from slopmeter.repo import RepoContext, RepoError
 from slopmeter.report import render
@@ -21,7 +22,9 @@ from slopmeter.target import materialize
 
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
-        prog="slopmeter", description="Score repository evidence, not vibes."
+        prog="slopmeter",
+        description="Score repository evidence, not vibes.",
+        epilog="Project onboarding: slopmeter init [DIRECTORY] [--all]",
     )
     parser.add_argument("target", nargs="?", help="local repository path or GitHub URL")
     parser.add_argument("--online", action="store_true", help="enable explicit network checks")
@@ -90,7 +93,10 @@ def _write_output(filename: str, content: str) -> None:
 
 
 def main(argv: list[str] | None = None) -> int:
-    args = build_parser().parse_args(argv)
+    arguments = list(sys.argv[1:] if argv is None else argv)
+    if arguments and arguments[0] == "init":
+        return run_init(arguments[1:])
+    args = build_parser().parse_args(arguments)
     if args.list_checks:
         print(_list_checks())
         return 0

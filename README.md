@@ -59,6 +59,7 @@ Runtime analysis uses only the Python standard library. Development uses pytest 
 
 ```text
 slopmeter <path-or-url> [options]
+slopmeter init [directory] [--component agents|prompt|codex|github] [--all]
 
   --online                    enable registry and GitHub API checks
   --token TOKEN               GitHub token; defaults to GITHUB_TOKEN
@@ -86,6 +87,11 @@ slopmeter . --format html --output slopmeter-report.html
 slopmeter --explain C1
 ```
 
+To onboard a project, run `slopmeter init .`. The safe default installs the agent policy and GitHub
+Actions evidence gate. Use `--all` to also install the portable audit prompt and Codex `Stop` hook, or
+repeat `--component` to choose individual integrations. Existing files are left untouched unless
+`--force` is explicit; `--dry-run` previews the complete plan without writing anything.
+
 Exit status is `0` for a completed run, `1` when `--fail-under` is not met, and `2` for usage or runtime
 errors. Tokens and detected secret values are never printed.
 
@@ -95,7 +101,8 @@ automatically disabled for pipes and redirected output, so reports remain machin
 
 ## Agent and CI integration
 
-The [agent integration guide](docs/AGENT_INTEGRATION.md) provides copyable templates for:
+The [agent integration guide](docs/AGENT_INTEGRATION.md) documents `slopmeter init` and provides
+copyable templates for:
 
 - project-level `AGENTS.md` instructions;
 - a reusable repository-audit prompt;
@@ -133,7 +140,7 @@ complete successfully. Without it, reports continue to be written to stdout.
 ███████║███████╗╚██████╔╝██║         ██║ ╚═╝ ██║███████╗███████╗   ██║   ███████╗██║  ██║
 ╚══════╝╚══════╝ ╚═════╝ ╚═╝         ╚═╝     ╚═╝╚══════╝╚══════╝   ╚═╝   ╚══════╝╚═╝  ╚═╝
 score the evidence, not the vibes
-v0.5.0 · target ./some-tool
+v0.6.0 · target ./some-tool
 
 ────────────────────────────────────────────────────────────────────────────────────────────────────────
 64 / 100                   │ Slop level  4 / 10           │ Promising. Some receipts.

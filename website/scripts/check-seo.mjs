@@ -72,6 +72,7 @@ for (const requiredText of [
   "## Start here",
   "Complete methodology",
   "Agent and CI integration",
+  "slopmeter init .",
   "JSON report schema",
 ]) {
   if (!llms.includes(requiredText)) {

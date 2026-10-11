@@ -19,6 +19,13 @@ def test_version_and_list_checks(capsys):
     assert "I1\tAI-assistance disclosure" in output
 
 
+def test_help_advertises_project_onboarding(capsys):
+    with pytest.raises(SystemExit) as error:
+        main(["--help"])
+    assert error.value.code == 0
+    assert "slopmeter init [DIRECTORY] [--all]" in capsys.readouterr().out
+
+
 def test_explain(capsys):
     assert main(["--explain", "C1"]) == 0
     assert "Claims have receipts" in capsys.readouterr().out

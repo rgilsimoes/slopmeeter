@@ -13,6 +13,8 @@ Slop Meeter inspects repository history, tests and CI, claims and their receipts
 
 ## Agent templates
 
+Run `slopmeter init .` for the recommended `AGENTS.md` and GitHub Actions setup. Use `slopmeter init . --all` to add the audit prompt and Codex hook, or select individual components with repeated `--component` flags. The command previews safely with `--dry-run` and never replaces conflicting files unless `--force` is explicit.
+
 - [AGENTS.md template](https://raw.githubusercontent.com/rgilsimoes/slopmeeter/main/integrations/AGENTS.md): Persistent evidence-review instructions for coding agents.
 - [Repository audit prompt](https://raw.githubusercontent.com/rgilsimoes/slopmeeter/main/integrations/prompts/slop-review.md): Portable read-only audit workflow.
 - [Codex hook configuration](https://raw.githubusercontent.com/rgilsimoes/slopmeeter/main/integrations/codex/hooks.json): Run one Slop Meeter review before a Codex turn finishes.

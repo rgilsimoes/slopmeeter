@@ -4,6 +4,11 @@ All notable changes to Slop Meeter are documented here.
 
 ## Unreleased
 
+## 0.6.0 — 2026-10-11
+
+- Added safe CLI onboarding with `slopmeter init`: recommended agent and CI setup, selectable or full
+  integration profiles, complete conflict preflight, dry-run previews, and explicit replacement.
+
 ## 0.5.0 — 2026-10-11
 
 - Added an agent integration kit with copyable `AGENTS.md` guidance, a read-only audit prompt, a

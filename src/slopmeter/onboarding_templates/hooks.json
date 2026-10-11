@@ -1,0 +1,17 @@
+{
+  "description": "Run one Slop Meeter evidence review before Codex finishes a turn.",
+  "hooks": {
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 \"$(git rev-parse --show-toplevel)/.codex/hooks/slopmeter_stop.py\"",
+            "timeout": 120,
+            "statusMessage": "Reviewing repository evidence with Slop Meeter"
+          }
+        ]
+      }
+    ]
+  }
+}

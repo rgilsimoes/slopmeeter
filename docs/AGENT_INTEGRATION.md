@@ -21,6 +21,30 @@ the result; they do not copy the rule definitions or thresholds from the
 Use `AGENTS.md` plus CI for the smallest useful setup. Add the Codex hook when a review should happen
 automatically during interactive agent work.
 
+## Onboard from the CLI
+
+Run the recommended setup from the root of a project:
+
+```sh
+slopmeter init .
+```
+
+This installs `AGENTS.md` and `.github/workflows/slopmeter.yml`. Add every available integration with
+`slopmeter init . --all`, or select individual components by repeating `--component` with `agents`,
+`prompt`, `codex`, or `github`:
+
+```sh
+slopmeter init . --component agents --component codex
+```
+
+The prompt is installed at `.slopmeter/prompts/slop-review.md`; the Codex files are installed at
+`.codex/hooks.json` and `.codex/hooks/slopmeter_stop.py`. The command checks every destination before
+writing, leaves identical files unchanged, and refuses to overwrite a different file. Use `--dry-run`
+to inspect the plan or explicit `--force` after reviewing conflicts. It also rejects symlinked parent
+directories so onboarding cannot write outside the selected project.
+
+The templates below remain available for manual copying and review.
+
 ## Add the project instructions
 
 Copy [`integrations/AGENTS.md`](../integrations/AGENTS.md) into the repository root, or merge its
